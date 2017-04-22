@@ -293,3 +293,8 @@ function endBox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+function buildTable(table,header, data)
+    set(table, 'columnname', header);
+    set(table, 'data', data);
+    
