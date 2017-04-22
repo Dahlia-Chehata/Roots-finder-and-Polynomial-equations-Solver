@@ -134,7 +134,7 @@ function stepButton_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in solveButton.
 function solveButton_Callback(hObject, eventdata, handles)
-selectedIndex = get(handles.popupmenu1, 'Value');
+selectedIndex = get(handles.popupmenu1, 'value');
 f = get(handles.funcBox, 'string');
 a = str2num(get(handles.startBox, 'string'));
 b = str2num(get(handles.endBox, 'string'));
@@ -208,7 +208,7 @@ end
 function pushbutton6_Callback(hObject, eventdata, handles)
 try
     inputFile = fopen('input.txt');
-    selectedIndex = get(handles.popupmenu1, 'Value');
+    selectedIndex = get(handles.popupmenu1, 'value');
     if selectedIndex  == 1 || selectedIndex == 2 || selectedIndex == 5
         C = textscan(inputFile,'%s %s %s');
         set(handles.funcBox, 'string', C{1}{1});
