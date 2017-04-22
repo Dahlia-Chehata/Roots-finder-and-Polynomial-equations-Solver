@@ -6,11 +6,11 @@ IterTable=zeros(0,5);
  for i=1:1:MaxIterations
       g=f;
       dF=diff(g);
-      dFx=eval((subs(diff(f),x(i))));
+      dFx=eval((subs((dF),x(i))));
     if (abs(dFx)<=eps)
         error('the derivative equals zero');
     else 
-        Fx=double(subs(f,x(i)));
+        Fx=double(subs(g,x(i)));
         x(i+1)=x(i)-(Fx/dFx);
         ea= (x(i+1)-x(i))/(x(i+1))*100;
         row=[x(i),Fx,dFx,x(i+1),abs(ea)];
