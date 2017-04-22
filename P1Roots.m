@@ -136,28 +136,30 @@ function stepButton_Callback(hObject, eventdata, handles)
 function solveButton_Callback(hObject, eventdata, handles)
 selectedIndex = get(handles.popupmenu1, 'value');
 f = get(handles.funcBox, 'string');
+g = get(handles.extraFuncBox, 'string');
 a = str2num(get(handles.startBox, 'string'));
+a1 = str2num(get(handles.mainStartBox, 'string'));
 b = str2num(get(handles.endBox, 'string'));
 maxIterations = str2num(get(handles.itLabel, 'string'));
 eps = str2num(get(handles.percLabel, 'string'));
-solveMainAlgorithm(selectedIndex, f, a, b, maxIterations, eps);
-solveOptionalAlgorithm(selectedIndex, f, a, b, maxIterations, eps, handles);
+solveMainAlgorithm(f, a1, maxIterations, eps);
+solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
 
-function solveOptionalAlgorithm(selectedIndex, f, a, b, maxIterations, eps, handles)
+function solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles)
 try
     switch selectedIndex
         case 1
             [root,iterations,header,IterTable,precision,bound,time] = bisection(f, a, b, maxIterations,eps);
         case 2
-            [root,iterations,IterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps);
+            [root,iterations,header,IterTable,precision,bound,time] = regulafalsi(f,a,b, maxIterations,eps);
         case 3
-            [ root,iterations,IterTable,precision,time ] = fixed_point( f,a,g, maxIterations, eps );
+            [ root,iterations,header,IterTable,precision,bound,time ] = fixed_point( f,a,g, maxIterations, eps );
         case 4
-            [root,iterations,IterTable,precision,time] = NewtonRaphson(f,initVal,MaxIterations,eps,es);
+            [root,iterations,header,IterTable,precision,bound,time] = NewtonRaphson(f,initVal,maxIterations,eps,eps);
         case 5
-            [root,iterations,IterTable,precision,time] = Secant(f,a, b,MaxIterations,eps,es);
+            [root,iterations,header,IterTable,precision,bound,time] = Secant(f,a, b,maxIterations,eps,eps);
         case 6
-            [root,iterations,IterTable,precision,time] = birgeVieta(polynomial,initVal,eps,MaxIterations);
+            [root,iterations,header,IterTable,precision,bound,time] = birgeVieta(f,a,eps,maxIterations);
         otherwise
              errordlg('Wrong method!');
              return;
@@ -166,6 +168,7 @@ try
     set(handles.optIterationsLabel, 'string', iterations);
     set(handles.optPrecisionLabel, 'string', precision);
     set(handles.optTimeLabel, 'string', time);
+    set(handles.optBoundLabel, 'string', bound);
     buildTable(handles.optTable,header, IterTable)
 catch ME
     errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
@@ -175,9 +178,21 @@ catch ME
 end
     
     
-function solveMainAlgorithm(selectedIndex, f, a, b, maxIterations, eps)
-
-
+function solveMainAlgorithm(f, a1, maxIterations, eps)
+try
+    [root,iterations,header,IterTable,precision,bound,time] = NewtonRaphson(f,a1,maxIterations,eps,eps);
+    set(handles.mainRootLabel, 'string', root);
+    set(handles.mainIterationsLabel, 'string', iterations);
+    set(handles.mainPrecisionLabel, 'string', precision);
+    set(handles.mainTimeLabel, 'string', time);
+    set(handles.mainBoundLabel, 'string', bound);
+    buildTable(handles.mainTable,header, IterTable)
+catch ME
+    errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
+		ME.stack(1).name, ME.stack(1).line, ME.message);
+	fprintf(1, '%s\n', errorMessage);
+	uiwait(errordlg(errorMessage));
+end
 % --- Executes on selection change in popupmenu1.
 function popupmenu1_Callback(hObject, eventdata, handles)
 try
@@ -188,6 +203,11 @@ try
         set(handles.endBox, 'enable', 'on');
     elseif selectedIndex == 3 || selectedIndex == 4 || selectedIndex == 6
         set(handles.endBox, 'enable', 'off');
+    end
+    if selectedIndex == 3
+        set(handles.extraFuncBox, 'enable', 'on');
+    else
+        set(handles.extraFuncBox, 'enable', 'off');
     end
 catch ME
 	errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
@@ -220,9 +240,10 @@ try
         set(handles.startBox, 'string', C{2}{1});
         set(handles.endBox, 'string', C{3}{1});
     elseif selectedIndex == 3 || selectedIndex == 4 || selectedIndex == 6
-        C = textscan(inputFile,'%s %s');
+        C = textscan(inputFile,'%s %s %s');
         set(handles.funcBox, 'string', C{1}{1});
-        set(handles.startBox, 'string', C{2}{1});
+        set(handles.extraFuncBox, 'string', C{2}{1});
+        set(handles.startBox, 'string', C{3}{1});
 
     end
 catch ME
@@ -231,7 +252,7 @@ catch ME
 	fprintf(1, '%s\n', errorMessage);
 	uiwait(errordlg(errorMessage));
 end
-fclose(fileID);
+fclose(inputFile);
 
 
 function funcBox_Callback(hObject, eventdata, handles)
@@ -303,3 +324,49 @@ function buildTable(table,header, data)
     set(table, 'columnname', header);
     set(table, 'data', data);
     
+
+
+
+function extraFuncBox_Callback(hObject, eventdata, handles)
+% hObject    handle to extraFuncBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of extraFuncBox as text
+%        str2double(get(hObject,'String')) returns contents of extraFuncBox as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function extraFuncBox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to extraFuncBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function mainStartBox_Callback(hObject, eventdata, handles)
+% hObject    handle to mainStartBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of mainStartBox as text
+%        str2double(get(hObject,'String')) returns contents of mainStartBox as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function mainStartBox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to mainStartBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

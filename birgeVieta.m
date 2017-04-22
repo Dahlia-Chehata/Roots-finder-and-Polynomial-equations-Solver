@@ -1,4 +1,4 @@
-function [root,iterations,IterTable,precision,time] = birgeVieta(polynomial,initVal,eps,MaxIterations)
+function [root,iterations,header,IterTable,precision,time] = birgeVieta(polynomial,initVal,eps,MaxIterations)
  
  tic;
  x=zeros(MaxIterations,1);
@@ -9,6 +9,7 @@ function [root,iterations,IterTable,precision,time] = birgeVieta(polynomial,init
  check=true;
  cnt=1;
  IterTable = zeros(0,3);
+ header = {'x' 'x(i+1)' 'abs(ea)'};
  while (check) 
      b=[];
      c=[];
@@ -41,4 +42,3 @@ function [root,iterations,IterTable,precision,time] = birgeVieta(polynomial,init
  iterations=cnt-1;
  precision=polyval(coeff,root);
 end
-

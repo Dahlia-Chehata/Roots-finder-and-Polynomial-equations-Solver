@@ -1,4 +1,4 @@
-function [root,iterations,IterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps)
+function [root,iterations,IterTable,precision,bound,time] = regulafalsi(f,a,b, maxIterations,eps)
     
     tic;
     i = 0;
