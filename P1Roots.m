@@ -173,7 +173,7 @@ end
 function pushbutton6_Callback(hObject, eventdata, handles)
 try
     inputFile = fopen('input.txt');
-    selectedIndex = get(handles.popupmenu1, 'value');
+    selectedIndex = get(handles.popupmenu1, 'Value');
     if selectedIndex  == 1 || selectedIndex == 2 || selectedIndex == 5
         C = textscan(inputFile,'%s %s %s');
         set(handles.funcBox, 'string', C{1}{1});
