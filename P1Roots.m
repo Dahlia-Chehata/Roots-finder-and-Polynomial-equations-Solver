@@ -54,7 +54,7 @@ function mxItBox_Callback(hObject, eventdata, handles)
     number = str2num(text);
     if isempty(str2num(text))
         set(hObject,'string','0');
-        warndlg('Input must be an integer');
+        errordlg('Input must be an integer');
     end
 
 % --- Executes during object creation, after setting all properties.
@@ -75,7 +75,7 @@ function percBox_Callback(hObject, eventdata, handles)
 	text = get(hObject, 'string');
     if isempty(str2num(text))
         set(hObject,'string','0');
-        warndlg('Input must be numerical');
+        errordlg('Input must be numerical');
     end
 
 % --- Executes during object creation, after setting all properties.
@@ -145,18 +145,22 @@ solveOptionalAlgorithm(selectedIndex, f, a, b, maxIterations, eps, handles);
 
 function solveOptionalAlgorithm(selectedIndex, f, a, b, maxIterations, eps, handles)
 try
-    if selectedIndex == 1
-        [root,iterations,IterTable,precision,bound,time] = bisection(f, a, b, maxIterations,eps);
-    elseif selectedIndex == 2
-        
-    elseif selectedIndex == 3
-        
-    elseif selectedIndex == 4
-        
-    elseif selectedIndex == 5
-        
-    elseif selectedIndex == 6
-
+    switch selectedIndex
+        case 1
+            [root,iterations,IterTable,precision,bound,time] = bisection(f, a, b, maxIterations,eps);
+        case 2
+            [root,iterations,IterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps);
+        case 3
+            [ root,iterations,IterTable,precision,time ] = fixed_point( f,a,g, maxIterations, eps );
+        case 4
+            [root,iterations,IterTable,precision,time] = NewtonRaphson(f,initVal,MaxIterations,eps,es);
+        case 5
+            [root,iterations,IterTable,precision,time] = Secant(f,a, b,MaxIterations,eps,es);
+        case 6
+            [root,iterations,IterTable,precision,time] = birgeVieta(polynomial,initVal,eps,MaxIterations);
+        otherwise
+             errordlg('Wrong method!');
+             return;
     end
     set(handles.optRootLabel, 'string', root);
     set(handles.optIterationsLabel, 'string', iterations);
@@ -166,7 +170,7 @@ catch ME
     errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
 		ME.stack(1).name, ME.stack(1).line, ME.message);
 	fprintf(1, '%s\n', errorMessage);
-	uiwait(warndlg(errorMessage));
+	uiwait(errordlg(errorMessage));
 end
     
     
@@ -188,7 +192,7 @@ catch ME
 	errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
 		ME.stack(1).name, ME.stack(1).line, ME.message);
 	fprintf(1, '%s\n', errorMessage);
-	uiwait(warndlg(errorMessage));
+	uiwait(errordlg(errorMessage));
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -224,7 +228,7 @@ catch ME
 	errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
 		ME.stack(1).name, ME.stack(1).line, ME.message);
 	fprintf(1, '%s\n', errorMessage);
-	uiwait(warndlg(errorMessage));
+	uiwait(errordlg(errorMessage));
 end
 fclose(fileID);
 
@@ -257,7 +261,7 @@ function startBox_Callback(hObject, eventdata, handles)
     number = str2num(text);
     if isempty(str2num(text))
         set(hObject,'string','0');
-        warndlg('Input must be an numerical');
+        errordlg('Input must be an numerical');
     end
 
 % --- Executes during object creation, after setting all properties.
@@ -279,7 +283,7 @@ function endBox_Callback(hObject, eventdata, handles)
     number = str2num(text);
     if isempty(str2num(text))
         set(hObject,'string','0');
-        warndlg('Input must be an numerical');
+        errordlg('Input must be an numerical');
     end
 
 % --- Executes during object creation, after setting all properties.
@@ -293,3 +297,8 @@ function endBox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+function buildTable(table,header, data)
+    set(table, 'columnname', header);
+    set(table, 'data', data);
+    
