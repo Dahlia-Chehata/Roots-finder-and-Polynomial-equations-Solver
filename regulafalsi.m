@@ -1,11 +1,11 @@
-function [root,iterations,IterTable,precision,time] = regulafalsi(f,a,b,eps)
+function [root,iterations,IterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps)
     
     tic;
     i = 0;
     fr = 1;
     IterTable = zeros(0,7);
     r=zeros(0);
-    while(abs (fr) > eps)
+    while(abs (fr) > eps && i < maxIterations)
         i=i+1;
          if (abs(f(a)-f(b))<=eps)
             iterations=i;

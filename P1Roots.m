@@ -125,18 +125,52 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton4.
-function pushbutton4_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton4 (see GCBO)
+% --- Executes on button press in stepButton.
+function stepButton_Callback(hObject, eventdata, handles)
+% hObject    handle to stepButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in pushbutton5.
-function pushbutton5_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% --- Executes on button press in solveButton.
+function solveButton_Callback(hObject, eventdata, handles)
+selectedIndex = get(handles.popupmenu1, 'Value');
+f = get(handles.funcBox, 'string');
+a = str2num(get(handles.startBox, 'string'));
+b = str2num(get(handles.endBox, 'string'));
+maxIterations = str2num(get(handles.itLabel, 'string'));
+eps = get(handles.percLabel, 'string');
+solveMainAlgorithm(selectedIndex, f, a, b, maxIterations, eps);
+solveOptionalAlgorithm(selectedIndex, f, a, b, maxIterations, eps, handles);
+
+function solveOptionalAlgorithm(selectedIndex, f, a, b, maxIterations, eps, handles)
+try
+    if selectedIndex == 1
+        [root,iterations,IterTable,precision,bound,time] = bisection(f, a, b, maxIterations,eps);
+    elseif selectedIndex == 2
+        
+    elseif selectedIndex == 3
+        
+    elseif selectedIndex == 4
+        
+    elseif selectedIndex == 5
+        
+    elseif selectedIndex == 6
+
+    end
+    set(handles.optRootLabel, 'string', root);
+    set(handles.optIterationsLabel, 'string', iterations);
+    set(handles.optPrecisionLabel, 'string', precision);
+    set(handles.optTimeLabel, 'string', time);
+catch ME
+    errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
+		ME.stack(1).name, ME.stack(1).line, ME.message);
+	fprintf(1, '%s\n', errorMessage);
+	uiwait(warndlg(errorMessage));
+end
+    
+    
+function solveMainAlgorithm(selectedIndex, f, a, b, maxIterations, eps)
 
 
 % --- Executes on selection change in popupmenu1.

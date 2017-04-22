@@ -1,0 +1,55 @@
+function [ root,iterations,IterTable,precision,time ] = fixed_point( f,a,g,eps )
+    tic;
+    i = 0;
+    xr = a;
+    IterTable = zeros(0,4);
+    iterations = 0;
+    condition = true;
+    while(condition)
+        xr_old = xr;
+        xr = g(xr_old);
+        if(xr ~= 0)
+        	ea = fabs((xr - xr_old) / xr) * 100;
+        end
+        iterations = iterations + 1;
+        row=[xr_old,g(xr_old),xr,abs(ea)];
+        IterTable=[IterTable;row];
+   end
+   root = xr
+   precision=f(root);
+   time=toc;
+   iterations=i;
+end
+
+
+function [root,iterations,IterTable,precision,time] = regulafalsi(f,a,b,eps)
+    
+   
+    fr = 1;
+
+    r=zeros(0);
+    while(abs (fr) > eps)
+        i=i+1;
+         if (abs(f(a)-f(b))<=eps)
+            iterations=i;
+            root = 'Regula falsi can''t compute the root';
+            return;
+        end
+        r(i) = a - ((f(a)*(b-a))/(f(b) - f(a)));
+        if (i~=1)
+            ea=((r(i)-r(i-1))/r(i))*100;
+        else 
+            ea=0;
+        end  
+           
+        if(f(r(i))*f(a) > 0)
+            b = r(i);
+            fr = f(b);
+            root = b;
+        else
+            a = r(i);
+            fr = f(a);
+            root = a;
+        end
+    end
+end
