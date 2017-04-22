@@ -1,4 +1,4 @@
-function [root,Iterations,IterTable,precision,bound,time] = bisection(f, a, b, MaxIterations,eps)
+function [root,Iterations,header,IterTable,precision,bound,time] = bisection(f, a, b, MaxIterations,eps)
     tic;
     IterTable = zeros(0,7);
     r=zeros(0);
@@ -12,6 +12,7 @@ function [root,Iterations,IterTable,precision,bound,time] = bisection(f, a, b, M
       error( 'eval f(a) and f(b) do not have opposite signs' );
     end
     Iterations = MaxIterations;
+    header = {'a' 'F(a)' 'b' 'F(b)' 'r(i)' 'F(r(i))' 'abs(ea)'};
     for i = 1:1:MaxIterations
         r(i) = (a + b)/2;
         if (i~=1)
@@ -21,7 +22,7 @@ function [root,Iterations,IterTable,precision,bound,time] = bisection(f, a, b, M
         end   
             row=[a,subs(f,'x',a),b,subs(f,'x',b),r(i),subs(f, 'x', r(i)),abs(ea)];
             IterTable=[IterTable;row];
-        if ( abs(subs(f, 'x',r(i))) <=eps )
+        if ( abs(subs(f, 'x',r(i))) <= eps)
             xr = r(i);
             time=toc;
             Iterations = i;

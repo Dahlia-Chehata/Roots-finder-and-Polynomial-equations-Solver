@@ -139,7 +139,7 @@ f = get(handles.funcBox, 'string');
 a = str2num(get(handles.startBox, 'string'));
 b = str2num(get(handles.endBox, 'string'));
 maxIterations = str2num(get(handles.itLabel, 'string'));
-eps = get(handles.percLabel, 'string');
+eps = str2num(get(handles.percLabel, 'string'));
 solveMainAlgorithm(selectedIndex, f, a, b, maxIterations, eps);
 solveOptionalAlgorithm(selectedIndex, f, a, b, maxIterations, eps, handles);
 
@@ -147,7 +147,7 @@ function solveOptionalAlgorithm(selectedIndex, f, a, b, maxIterations, eps, hand
 try
     switch selectedIndex
         case 1
-            [root,iterations,IterTable,precision,bound,time] = bisection(f, a, b, maxIterations,eps);
+            [root,iterations,header,IterTable,precision,bound,time] = bisection(f, a, b, maxIterations,eps);
         case 2
             [root,iterations,IterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps);
         case 3
@@ -166,6 +166,7 @@ try
     set(handles.optIterationsLabel, 'string', iterations);
     set(handles.optPrecisionLabel, 'string', precision);
     set(handles.optTimeLabel, 'string', time);
+    buildTable(handles.optTable,header, IterTable)
 catch ME
     errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
 		ME.stack(1).name, ME.stack(1).line, ME.message);
