@@ -50,10 +50,11 @@ varargout{1} = handles.output;
 
 
 function mxItBox_Callback(hObject, eventdata, handles)
-	text = get(hObject, 'string');
-    if isempty(str2num(text))
+    text = get(hObject, 'string');
+    number = str2num(text);
+    if isempty(str2num(text)) ||  round(str2double(number)) ~= str2double(number)
         set(hObject,'string','0');
-        warndlg('Input must be numerical');
+        warndlg('Input must be an integer');
     end
 
 % --- Executes during object creation, after setting all properties.
@@ -218,10 +219,11 @@ end
 
 
 function startBox_Callback(hObject, eventdata, handles)
-	number = str2num(get(hObject, 'string'));
-    if isempty(str2num(number) || round(number) ~= number)
+    text = get(hObject, 'string');
+    number = str2num(text);
+    if isempty(str2num(text))
         set(hObject,'string','0');
-        warndlg('Input must be numerical');
+        warndlg('Input must be an numerical');
     end
 
 % --- Executes during object creation, after setting all properties.
@@ -239,10 +241,11 @@ end
 
 
 function endBox_Callback(hObject, eventdata, handles)
-	number = str2num(get(hObject, 'string'));
-    if isempty(str2num(number) || round(number) ~= number)
+    text = get(hObject, 'string');
+    number = str2num(text);
+    if isempty(str2num(text))
         set(hObject,'string','0');
-        warndlg('Input must be numerical');
+        warndlg('Input must be an numerical');
     end
 
 % --- Executes during object creation, after setting all properties.

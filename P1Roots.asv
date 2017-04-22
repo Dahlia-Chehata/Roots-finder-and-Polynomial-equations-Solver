@@ -1,30 +1,5 @@
 function varargout = P1Roots(varargin)
-% P1ROOTS M-file for P1Roots.fig
-%      P1ROOTS, by itself, creates a new P1ROOTS or raises the existing
-%      singleton*.
-%
-%      H = P1ROOTS returns the handle to a new P1ROOTS or the handle to
-%      the existing singleton*.
-%
-%      P1ROOTS('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in P1ROOTS.M with the given input arguments.
-%
-%      P1ROOTS('Property','Value',...) creates a new P1ROOTS or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before P1Roots_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to P1Roots_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help P1Roots
-
-% Last Modified by GUIDE v2.5 22-Apr-2017 01:04:42
-
-% Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
@@ -75,13 +50,12 @@ varargout{1} = handles.output;
 
 
 function mxItBox_Callback(hObject, eventdata, handles)
-% hObject    handle to mxItBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of mxItBox as text
-%        str2double(get(hObject,'String')) returns contents of mxItBox as a double
-
+    text = get(hObject, 'string');
+    number = str2num(text);
+    if isempty(str2n(text)) || isempty(str2num(['uint8(',str13,')'])
+        set(hObject,'string','0');
+        warndlg('Input must be an integer');
+    end
 
 % --- Executes during object creation, after setting all properties.
 function mxItBox_CreateFcn(hObject, eventdata, handles)
@@ -98,13 +72,11 @@ end
 
 
 function percBox_Callback(hObject, eventdata, handles)
-% hObject    handle to percBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of percBox as text
-%        str2double(get(hObject,'String')) returns contents of percBox as a double
-
+	text = get(hObject, 'string');
+    if isempty(str2num(text))
+        set(hObject,'string','0');
+        warndlg('Input must be numerical');
+    end
 
 % --- Executes during object creation, after setting all properties.
 function percBox_CreateFcn(hObject, eventdata, handles)
@@ -119,18 +91,15 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% --- Executes on button press in setDefaultValueBtn.
+function setDefaultValueBtn_Callback(hObject, eventdata, handles)
+set(handles.itLabel, 'string', 50);
+set(handles.percLabel, 'string', 0.00001);
 
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% --- Executes on button press in setValueBtn.
+function setValueBtn_Callback(hObject, eventdata, handles)
+set(handles.itLabel, 'string', get(handles.mxItBox, 'string'));
+set(handles.percLabel, 'string', get(handles.percBox, 'string'));
 
 
 % --- Executes on selection change in listbox1.
@@ -205,7 +174,7 @@ end
 function pushbutton6_Callback(hObject, eventdata, handles)
 try
     inputFile = fopen('input.txt');
-    selectedIndex = get(handles.popupmenu1, 'value');
+    selectedIndex = get(handles.popupmenu1, 'Value');
     if selectedIndex  == 1 || selectedIndex == 2 || selectedIndex == 5
         C = textscan(inputFile,'%s %s %s');
         set(handles.funcBox, 'string', C{1}{1});
@@ -250,13 +219,12 @@ end
 
 
 function startBox_Callback(hObject, eventdata, handles)
-% hObject    handle to startBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of startBox as text
-%        str2double(get(hObject,'String')) returns contents of startBox as a double
-
+    text = get(hObject, 'string');
+    number = str2num(text);
+    if isempty(str2num(text))
+        set(hObject,'string','0');
+        warndlg('Input must be an numerical');
+    end
 
 % --- Executes during object creation, after setting all properties.
 function startBox_CreateFcn(hObject, eventdata, handles)
@@ -273,13 +241,12 @@ end
 
 
 function endBox_Callback(hObject, eventdata, handles)
-% hObject    handle to endBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of endBox as text
-%        str2double(get(hObject,'String')) returns contents of endBox as a double
-
+    text = get(hObject, 'string');
+    number = str2num(text);
+    if isempty(str2num(text))
+        set(hObject,'string','0');
+        warndlg('Input must be an numerical');
+    end
 
 % --- Executes during object creation, after setting all properties.
 function endBox_CreateFcn(hObject, eventdata, handles)
