@@ -52,7 +52,7 @@ varargout{1} = handles.output;
 function mxItBox_Callback(hObject, eventdata, handles)
     text = get(hObject, 'string');
     number = str2num(text);
-    if isempty(str2num(text)) ||  round(str2double(number)) ~= str2double(number)
+    if isempty(str2num(text))
         set(hObject,'string','0');
         warndlg('Input must be an integer');
     end

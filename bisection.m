@@ -24,7 +24,7 @@ function [root,Iterations,IterTable,precision,bound,time] = bisection(f, a, b, M
         if ( abs(subs(f, 'x',r(i))) <=eps )
             xr = r(i);
             time=toc;
-            Iterations = i + 1;
+            Iterations = i;
             break;
         elseif (subs(f, 'x',r(i))*subs(f,'x',a) < 0 )
             b = r(i);
