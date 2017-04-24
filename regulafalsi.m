@@ -1,36 +1,45 @@
-function [root,iterations,IterTable,precision,bound,time] = regulafalsi(f,a,b, maxIterations,eps)
-    
-    tic;
-    i = 0;
-    fr = 1;
-    IterTable = zeros(0,7);
-    r=zeros(0);
-    while(abs (fr) > eps && i < maxIterations)
-        i=i+1;
-         if (abs(f(a)-f(b))<=eps)
-            iterations=i;
-            root = 'Regula falsi can''t compute the root';
-            return;
-        end
-        r(i) = a - ((f(a)*(b-a))/(f(b) - f(a)));
-        if (i~=1)
-            ea=((r(i)-r(i-1))/r(i))*100;
-        else 
-            ea=0;
-        end  
-           row=[a,f(a),b,f(b),r(i),f(r(i)),abs(ea)];
-            IterTable=[IterTable;row];
-        if(f(r(i))*f(a) > 0)
-            b = r(i);
-            fr = f(b);
-            root = b;
-        else
-            a = r(i);
-            fr = f(a);
-            root = a;
-        end
+function [root,iterations, header,iterTable,precision,bound,time] = regulafalsi(f,a,b, maxIterations,eps)
+iterTable = [];
+bound = 0;
+header = {'Xl' 'Xu' 'Xr' 'f(Xr)' 'eps'};
+Xl = min(a, b);
+Xu = max(a, b);
+tic;
+Xl_val = eval_func(f, Xl);
+Xu_val = eval_func(f, Xu);
+if Xl_val * Xu_val > 0.0
+    error('Function has same sign at end points');
+end
+prev_Xr = nan;
+Xr = 0;
+relative_error = nan;
+for i = 1 : maxIterations
+    Xr = Xu - Xu_val * (Xu - Xl) / (Xu_val - Xl_val);
+    Xr_val = eval_func(f, Xr);
+    if i > 1
+        relative_error = abs((Xr - prev_Xr) / Xr) * 100;
     end
-   time=toc;
-   iterations=i;
-   precision=f(root);
+    iterTable = [iterTable; [Xl Xu Xr Xr_val relative_error]];
+    if Xr_val == 0.0
+        break;
+    elseif Xr_val * Xl_val < 0
+        Xu = Xr;
+        Xu_val = Xr_val;
+    else
+        Xl = Xr;
+        Xl_val = Xr_val;
+    end
+    if i > 1 && abs(Xr - prev_Xr) < eps
+        break;
+    end
+    prev_Xr = Xr;
+end
+time = toc;
+root = Xr;
+iterations = i;
+precision = relative_error;
+end
+
+function [answer] =  eval_func(func, value)
+answer = eval(subs(func, value));
 end

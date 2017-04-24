@@ -1,30 +1,27 @@
-function [root,iterations,IterTable,precision,bound,time] = NewtonRaphson(f,initVal,MaxIterations,eps,es)
+function [root,iterations,header, iterTable,precision, bound, time] = NewtonRaphson(f,initVal,maxIterations, eps, tolerance)
+syms x;
+df = diff(f, x);
+old_x = initVal;
+iterTable = [];
+bound = 0;
+header = {'Xi' 'f(Xi)' 'f`(Xi)' 'X(i+1)' 'eps'};
 tic;
-x = zeros(1,MaxIterations);
-x(1)=initVal;
-IterTable=zeros(0,5);
-g=f;
- for i=1:1:MaxIterations
-      dF=diff(g);
-      dFx=eval((subs((dF),x(i))));
-    if (abs(dFx)<=eps)
+for i = 1 : maxIterations
+    f_val = eval(subs(f, old_x));
+    df_val = eval(subs(df, old_x));
+    if (abs(df_val) == 0.0)
         error('the derivative equals zero');
-    else 
-        Fx=eval(subs(g,x(i)));
-        x(i+1)=x(i)-(Fx/dFx);
-        ea= (x(i+1)-x(i))/(x(i+1))*100;
-        row=[x(i),Fx,dFx,x(i+1),abs(ea)];
-        IterTable=[IterTable;row];
-        check=eval(subs(f,x(i+1)));
-        if (abs(check)<=eps || abs(ea)<=es)
-            root=x(i+1);
-            time=toc;
-            break;
-        end
-    end 
-     g=dF;
- end
-iterations=i;
-precision=eval(subs(f,root));
+    end
+    new_x = old_x - (f_val / df_val);
+    relative_error = abs((new_x - old_x) / new_x) * 100;
+    iterTable = [iterTable; [old_x f_val df_val new_x relative_error]];
+    old_x = new_x;
+    if(relative_error <= tolerance)
+        break;
+    end
 end
-
+time = toc;
+root = new_x;
+iterations = i;
+precision = eval(subs(f, root));
+end

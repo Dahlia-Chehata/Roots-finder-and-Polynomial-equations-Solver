@@ -2,11 +2,11 @@ function varargout = P1Roots(varargin)
 
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
-                   'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @P1Roots_OpeningFcn, ...
-                   'gui_OutputFcn',  @P1Roots_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
-                   'gui_Callback',   []);
+    'gui_Singleton',  gui_Singleton, ...
+    'gui_OpeningFcn', @P1Roots_OpeningFcn, ...
+    'gui_OutputFcn',  @P1Roots_OutputFcn, ...
+    'gui_LayoutFcn',  [] , ...
+    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -38,7 +38,7 @@ guidata(hObject, handles);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = P1Roots_OutputFcn(hObject, eventdata, handles) 
+function varargout = P1Roots_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -50,12 +50,12 @@ varargout{1} = handles.output;
 
 
 function mxItBox_Callback(hObject, eventdata, handles)
-    text = get(hObject, 'string');
-    number = str2num(text);
-    if isempty(str2num(text))
-        set(hObject,'string','0');
-        errordlg('Input must be an integer');
-    end
+text = get(hObject, 'string');
+number = str2num(text);
+if isempty(str2num(text))
+    set(hObject,'string','0');
+    errordlg('Input must be an integer');
+end
 
 % --- Executes during object creation, after setting all properties.
 function mxItBox_CreateFcn(hObject, eventdata, handles)
@@ -72,11 +72,11 @@ end
 
 
 function percBox_Callback(hObject, eventdata, handles)
-	text = get(hObject, 'string');
-    if isempty(str2num(text))
-        set(hObject,'string','0');
-        errordlg('Input must be numerical');
-    end
+text = get(hObject, 'string');
+if isempty(str2num(text))
+    set(hObject,'string','0');
+    errordlg('Input must be numerical');
+end
 
 % --- Executes during object creation, after setting all properties.
 function percBox_CreateFcn(hObject, eventdata, handles)
@@ -142,7 +142,7 @@ a1 = str2num(get(handles.mainStartBox, 'string'));
 b = str2num(get(handles.endBox, 'string'));
 maxIterations = str2num(get(handles.itLabel, 'string'));
 eps = str2num(get(handles.percLabel, 'string'));
-solveMainAlgorithm(f, a1, maxIterations, eps);
+solveMainAlgorithm(f, a1, maxIterations, eps, handles);
 solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
 
 function solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles)
@@ -155,14 +155,14 @@ try
         case 3
             [ root,iterations,header,IterTable,precision,bound,time ] = fixed_point( f,a,g, maxIterations, eps );
         case 4
-            [root,iterations,header,IterTable,precision,bound,time] = NewtonRaphson(f,initVal,maxIterations,eps,eps);
+            [root,iterations,header,IterTable,precision,bound,time] = NewtonRaphson(f,a,maxIterations,eps,eps);
         case 5
             [root,iterations,header,IterTable,precision,bound,time] = Secant(f,a, b,maxIterations,eps,eps);
         case 6
             [root,iterations,header,IterTable,precision,bound,time] = birgeVieta(f,a,eps,maxIterations);
         otherwise
-             errordlg('Wrong method!');
-             return;
+            errordlg('Wrong method!');
+            return;
     end
     set(handles.optRootLabel, 'string', root);
     set(handles.optIterationsLabel, 'string', iterations);
@@ -172,13 +172,13 @@ try
     buildTable(handles.optTable,header, IterTable)
 catch ME
     errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
-		ME.stack(1).name, ME.stack(1).line, ME.message);
-	fprintf(1, '%s\n', errorMessage);
-	uiwait(errordlg(errorMessage));
+        ME.stack(1).name, ME.stack(1).line, ME.message);
+    fprintf(1, '%s\n', errorMessage);
+    uiwait(errordlg(errorMessage));
 end
-    
-    
-function solveMainAlgorithm(f, a1, maxIterations, eps)
+
+
+function solveMainAlgorithm(f, a1, maxIterations, eps, handles)
 try
     [root,iterations,header,IterTable,precision,bound,time] = NewtonRaphson(f,a1,maxIterations,eps,eps);
     set(handles.mainRootLabel, 'string', root);
@@ -189,9 +189,9 @@ try
     buildTable(handles.mainTable,header, IterTable)
 catch ME
     errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
-		ME.stack(1).name, ME.stack(1).line, ME.message);
-	fprintf(1, '%s\n', errorMessage);
-	uiwait(errordlg(errorMessage));
+        ME.stack(1).name, ME.stack(1).line, ME.message);
+    fprintf(1, '%s\n', errorMessage);
+    uiwait(errordlg(errorMessage));
 end
 % --- Executes on selection change in popupmenu1.
 function popupmenu1_Callback(hObject, eventdata, handles)
@@ -210,10 +210,10 @@ try
         set(handles.extraFuncBox, 'enable', 'off');
     end
 catch ME
-	errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
-		ME.stack(1).name, ME.stack(1).line, ME.message);
-	fprintf(1, '%s\n', errorMessage);
-	uiwait(errordlg(errorMessage));
+    errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
+        ME.stack(1).name, ME.stack(1).line, ME.message);
+    fprintf(1, '%s\n', errorMessage);
+    uiwait(errordlg(errorMessage));
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -244,13 +244,13 @@ try
         set(handles.funcBox, 'string', C{1}{1});
         set(handles.extraFuncBox, 'string', C{2}{1});
         set(handles.startBox, 'string', C{3}{1});
-
+        
     end
 catch ME
-	errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
-		ME.stack(1).name, ME.stack(1).line, ME.message);
-	fprintf(1, '%s\n', errorMessage);
-	uiwait(errordlg(errorMessage));
+    errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
+        ME.stack(1).name, ME.stack(1).line, ME.message);
+    fprintf(1, '%s\n', errorMessage);
+    uiwait(errordlg(errorMessage));
 end
 fclose(inputFile);
 
@@ -279,12 +279,12 @@ end
 
 
 function startBox_Callback(hObject, eventdata, handles)
-    text = get(hObject, 'string');
-    number = str2num(text);
-    if isempty(str2num(text))
-        set(hObject,'string','0');
-        errordlg('Input must be an numerical');
-    end
+text = get(hObject, 'string');
+number = str2num(text);
+if isempty(str2num(text))
+    set(hObject,'string','0');
+    errordlg('Input must be an numerical');
+end
 
 % --- Executes during object creation, after setting all properties.
 function startBox_CreateFcn(hObject, eventdata, handles)
@@ -301,12 +301,12 @@ end
 
 
 function endBox_Callback(hObject, eventdata, handles)
-    text = get(hObject, 'string');
-    number = str2num(text);
-    if isempty(str2num(text))
-        set(hObject,'string','0');
-        errordlg('Input must be an numerical');
-    end
+text = get(hObject, 'string');
+number = str2num(text);
+if isempty(str2num(text))
+    set(hObject,'string','0');
+    errordlg('Input must be an numerical');
+end
 
 % --- Executes during object creation, after setting all properties.
 function endBox_CreateFcn(hObject, eventdata, handles)
@@ -321,9 +321,9 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 function buildTable(table,header, data)
-    set(table, 'columnname', header);
-    set(table, 'data', data);
-    
+set(table, 'columnname', header);
+set(table, 'data', data);
+
 
 
 
