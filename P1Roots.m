@@ -134,7 +134,8 @@ function stepButton_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in solveButton.
 function solveButton_Callback(hObject, eventdata, handles)
-selectedIndex = get(handles.popupmenu1, 'value');
+warning('off','all')
+selectedIndex = get(handles.popupmenu1, 'Value');
 f = get(handles.funcBox, 'string');
 g = get(handles.extraFuncBox, 'string');
 a = str2num(get(handles.startBox, 'string'));
@@ -142,7 +143,7 @@ a1 = str2num(get(handles.mainStartBox, 'string'));
 b = str2num(get(handles.endBox, 'string'));
 maxIterations = str2num(get(handles.itLabel, 'string'));
 eps = str2num(get(handles.percLabel, 'string'));
-solveMainAlgorithm(f, a1, maxIterations, eps, handles);
+%solveMainAlgorithm(f, a1, maxIterations, eps, handles);
 solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
 
 function solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles)
@@ -197,7 +198,7 @@ end
 function popupmenu1_Callback(hObject, eventdata, handles)
 try
     % Get value of popup
-    selectedIndex = get(handles.popupmenu1, 'value');
+    selectedIndex = get(handles.popupmenu1, 'Value');
     % Take action based upon selection
     if selectedIndex  == 1 || selectedIndex == 2 || selectedIndex == 5
         set(handles.endBox, 'enable', 'on');

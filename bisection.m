@@ -1,39 +1,42 @@
 function [root,Iterations,header,IterTable,precision,bound,time] = bisection(f, a, b, MaxIterations,eps)
 tic;
+syms x;
 IterTable = zeros(0,7);
+Xl = min(a, b);
+Xu = max(a, b);
 r=zeros(0);
-if ( abs (subs(f,'x',a)) <=eps)
-    xr = a;
+if ( abs (eval(subs(f,Xl))) <=eps)
+    xr = Xl;
     time=toc;
-elseif ( abs(subs(f,'x',b)) <=eps)
-    xr = b;
+elseif ( abs(eval(subs(f,Xu))) <=eps)
+    xr = Xu;
     time=toc;
-elseif (subs(f,'x',a) * subs(f,'x',b) > 0 )
+elseif (eval(subs(f,Xl)) * eval(subs(f,Xu)) > 0 )
     error( 'eval f(a) and f(b) do not have opposite signs' );
 end
 Iterations = MaxIterations;
 header = {'a' 'F(a)' 'b' 'F(b)' 'r(i)' 'F(r(i))' 'abs(ea)'};
 for i = 1:1:MaxIterations
-    r(i) = (a + b)/2;
+    r(i) = (Xl + Xu)/2;
     if (i~=1)
         ea=((r(i)-r(i-1))/r(i))*100;
     else
         ea=0;
     end
-    row=[a,subs(f,'x',a),b,subs(f,'x',b),r(i),subs(f, 'x', r(i)),abs(ea)];
+    row=[Xl,eval(subs(f,Xl)),Xu,eval(subs(f,Xu)),r(i),eval(subs(f, r(i))),abs(ea)];
     IterTable=[IterTable;row];
-    if ( abs(subs(f, 'x',r(i))) <= eps)
+    if ( abs(eval(subs(f,r(i)))) <= eps)
         xr = r(i);
         time=toc;
         Iterations = i;
         break;
-    elseif (subs(f, 'x',r(i))*subs(f,'x',a) < 0 )
-        b = r(i);
+    elseif (eval(subs(f,r(i)))*eval(subs(f,Xl)) < 0 )
+        Xu = r(i);
     else
-        a = r(i);
+        Xl = r(i);
     end
 end
 root=xr;
-precision=subs(f, 'x',xr);
-bound=(b-a)/(2^Iterations);
+precision=eval(subs(f,xr));
+bound=(Xu-Xl)/(2^Iterations);
 end
