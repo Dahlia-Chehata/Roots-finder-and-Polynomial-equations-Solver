@@ -1,4 +1,4 @@
-function [ root,iterations,header,IterTable,precision,bound,time ] = fixed_point( f,a,g, maxIterations, eps )
+function [ root,iterations,header,IterTable,precision,time] = fixed_point( f,a,g, maxIterations, eps )
 tic;
 syms x;
 i = 0;
@@ -6,7 +6,7 @@ xr = a;
 IterTable = zeros(0,4);
 iterations = 0;
 condition = true;
-header = {'x(i)' 'x(i+1) = g(x(i))' 'abs(ea)'};
+header = {'x(i)' 'x(i+1) = g(x(i))' 'F(x(i + 1))' 'abs(ea)' 'bound'};
 while(condition)
     xr_old = xr;
     xr = eval(subs(g, xr_old));
@@ -14,7 +14,7 @@ while(condition)
         ea = abs((xr - xr_old) / xr) * 100;
     end
     iterations = iterations + 1;
-    row=[xr_old,xr,abs(ea)];
+    row=[xr_old,xr,eval(subs(f,xr)),abs(ea)];
     IterTable=[IterTable;row];
     condition = (ea > eps) && (iterations < maxIterations);
 end

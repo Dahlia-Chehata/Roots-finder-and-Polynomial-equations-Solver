@@ -1,9 +1,8 @@
-function [root,iterations,header, iterTable,precision, bound, time] = NewtonRaphson(f,initVal,maxIterations, eps, tolerance)
+function [root,iterations,header, iterTable,precision, time] = NewtonRaphson(f,initVal,maxIterations, eps, tolerance)
 syms x;
 df = diff(f, x);
-old_x = initVal;
 iterTable = [];
-bound = 0;
+old_x = initVal;
 header = {'Xi' 'f(Xi)' 'f`(Xi)' 'X(i+1)' 'eps'};
 tic;
 for i = 1 : maxIterations
@@ -14,9 +13,9 @@ for i = 1 : maxIterations
     end
     new_x = old_x - (f_val / df_val);
     relative_error = abs((new_x - old_x) / new_x) * 100;
-    iterTable = [iterTable; [old_x f_val df_val new_x relative_error]];
+    iterTable = [iterTable; [old_x,f_val, df_val, new_x, relative_error]];
     old_x = new_x;
-    if(relative_error <= tolerance)
+    if(relative_error <= tolerance || eval(subs(f,new_x)) <= eps)
         break;
     end
 end

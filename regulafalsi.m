@@ -1,7 +1,7 @@
-function [root,iterations, header,iterTable,precision,bound,time] = regulafalsi(f,a,b, maxIterations,eps)
+function [root,iterations, header,iterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps)
 iterTable = [];
 bound = 0;
-header = {'Xl' 'Xu' 'Xr' 'f(Xr)' 'eps'};
+header = {'Xl' 'Xu' 'Xr' 'f(Xr)' 'eps' 'bound'};
 Xl = min(a, b);
 Xu = max(a, b);
 tic;

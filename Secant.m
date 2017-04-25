@@ -1,4 +1,4 @@
-function [root,iterations,header,IterTable,precision,bound,time] = Secant(f,a, b,MaxIterations,eps,es)
+function [root,iterations,header,IterTable,precision,time] = Secant(f,a, b,MaxIterations,eps,es)
 tic;
 x = zeros(1,MaxIterations);
 x(1)=a;

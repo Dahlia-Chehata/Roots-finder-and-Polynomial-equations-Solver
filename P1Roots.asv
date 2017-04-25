@@ -131,49 +131,39 @@ end
 % --- Executes on button press in stepButton.
 function stepButton_Callback(hObject, eventdata, handles)
 global changedData;
-global mRoot mIterations mHeader mIterTable mPrecision mTime;
-global oRoot oIterations oHeader oIterTable oPrecision oTime
+global mRoot mIterations,mHeader,mIterTable,mPrecision,mTime;
+global oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime
 global ind1 ind2;
+global index;
 if(changedData == true)
-    getGlobalData(handles);
+    getGlobalData();
 end
-setGlobalData(handles);
-
-
-function getGlobalData(handles)
-global ind1 ind2;
-global changedData;
-global mRoot mIterations mHeader mIterTable mPrecision mTime;
-global oRoot oIterations oHeader oIterTable oPrecision oTime;
-selectedIndex = get(handles.popupmenu1, 'Value');
-f = get(handles.funcBox, 'string');
-g = get(handles.extraFuncBox, 'string');
-a = str2num(get(handles.startBox, 'string'));
-a1 = str2num(get(handles.mainStartBox, 'string'));
-b = str2num(get(handles.endBox, 'string'));
-maxIterations = str2num(get(handles.itLabel, 'string'));
-eps = str2num(get(handles.percLabel, 'string'));
-[mRoot,mIterations,mHeader,mIterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
-[oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
-changedData = false;
-ind1 = 0;
-ind2 = 0;
-
-function setGlobalData(handles)
-global ind1 ind2;
-global changedData;
-global mRoot mIterations mHeader mIterTable mPrecision mTime;
-global oRoot oIterations oHeader oIterTable oPrecision oTime;
-if(changedData == false)
+setGlobalData();
+if(changedData = false)
    ind1 = ind1 + 1;
    ind2 = ind2 + 1;
-   h1 = length(mHeader);
-   h2 = length(oHeader);
-   mMaxSize = min(ind1, size(mIterTable,1));
-   oMaxSize = min(ind2, size(oIterTable,1));
-   setMainData(mRoot,mIterations,mHeader,mIterTable(1:mMaxSize, 1 : h1),mPrecision,mTime, handles);
-   setOptData(oRoot,oIterations,oHeader,oIterTable(1:oMaxSize, 1:h2),oPrecision,oTime, handles);
+   mMaxSize = min(ind1, length(mIterTable));
+   oMaxSize = min(ind2, length(oIterTable));
+   setMainData(mRoot,mIterations,mHeader,mIterTable(0:ind1),mPrecision,mTime, handles);
+   setOptData(oRoot,oIterations,oHeader,oIterTable(0:ind2),oPrecision,oTime, handles);
 end
+
+function getGlobalData()
+global ind1 ind2;
+
+    selectedIndex = get(handles.popupmenu1, 'Value');
+    f = get(handles.funcBox, 'string');
+    g = get(handles.extraFuncBox, 'string');
+    a = str2num(get(handles.startBox, 'string'));
+    a1 = str2num(get(handles.mainStartBox, 'string'));
+    b = str2num(get(handles.endBox, 'string'));
+    maxIterations = str2num(get(handles.itLabel, 'string'));
+    eps = str2num(get(handles.percLabel, 'string'));
+    [mRoot,mIterations,mHeader,mIterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
+    [oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
+    changedData = false;
+    ind1 = 0;
+    ind2 = 0;
 
 % --- Executes on button press in solveButton.
 function solveButton_Callback(hObject, eventdata, handles)
@@ -229,7 +219,13 @@ buildTable(handles.optTable,header, IterTable)
 
 function [root,iterations,header,IterTable,precision,time] = solveMainAlgorithm(f, a1, maxIterations, eps, handles)
 try
-    [root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a1,maxIterations,eps,eps);
+    [root,iterations,header,IterTable,precision,bound,time] = NewtonRaphson(f,a1,maxIterations,eps,eps);
+    set(handles.mainRootLabel, 'string', root);
+    set(handles.mainIterationsLabel, 'string', iterations);
+    set(handles.mainPrecisionLabel, 'string', precision);
+    set(handles.mainTimeLabel, 'string', time);
+    set(handles.mainBoundLabel, 'string', bound);
+    buildTable(handles.mainTable,header, IterTable)
 catch ME
     errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
         ME.stack(1).name, ME.stack(1).line, ME.message);
@@ -242,6 +238,7 @@ set(handles.mainRootLabel, 'string', root);
 set(handles.mainIterationsLabel, 'string', iterations);
 set(handles.mainPrecisionLabel, 'string', precision);
 set(handles.mainTimeLabel, 'string', time);
+set(handles.mainBoundLabel, 'string', bound);
 buildTable(handles.mainTable,header, IterTable)
 
 % --- Executes on selection change in popupmenu1.
