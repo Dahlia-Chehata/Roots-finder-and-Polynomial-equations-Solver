@@ -145,6 +145,7 @@ global ind1 ind2;
 global changedData;
 global mRoot mIterations mHeader mIterTable mPrecision mTime;
 global oRoot oIterations oHeader oIterTable oPrecision oTime;
+global selectedIndex;
 selectedIndex = get(handles.popupmenu1, 'Value');
 f = get(handles.funcBox, 'string');
 g = get(handles.extraFuncBox, 'string');
@@ -153,6 +154,7 @@ a1 = str2num(get(handles.mainStartBox, 'string'));
 b = str2num(get(handles.endBox, 'string'));
 maxIterations = str2num(get(handles.itLabel, 'string'));
 eps = str2num(get(handles.percLabel, 'string'));
+setConstPlotData(selectedIndex, f, a, b, g)
 [mRoot,mIterations,mHeader,mIterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
 [oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
 changedData = false;
@@ -164,20 +166,34 @@ global ind1 ind2;
 global changedData;
 global mRoot mIterations mHeader mIterTable mPrecision mTime;
 global oRoot oIterations oHeader oIterTable oPrecision oTime;
+global selectedIndex;
 if(changedData == false)
-   ind1 = ind1 + 1;
-   ind2 = ind2 + 1;
-   h1 = length(mHeader);
-   h2 = length(oHeader);
-   mMaxSize = min(ind1, size(mIterTable,1));
-   oMaxSize = min(ind2, size(oIterTable,1));
-   setMainData(mRoot,mIterations,mHeader,mIterTable(1:mMaxSize, 1 : h1),mPrecision,mTime, handles);
-   setOptData(oRoot,oIterations,oHeader,oIterTable(1:oMaxSize, 1:h2),oPrecision,oTime, handles);
+    ind1 = ind1 + 1;
+    ind2 = ind2 + 1;
+    h1 = length(mHeader);
+    h2 = length(oHeader);
+    mMaxSize = min(ind1, size(mIterTable,1));
+    oMaxSize = min(ind2, size(oIterTable,1));
+    setIterPlotData(oIterTable(oMaxSize:oMaxSize, 1:h2));
+    setMainData(mRoot,mIterations,mHeader,mIterTable(1:mMaxSize, 1 : h1),mPrecision,mTime, handles);
+    setOptData(oRoot,oIterations,oHeader,oIterTable(1:oMaxSize, 1:h2),oPrecision,oTime, handles);
 end
+
+function setConstPlotData(selectedIndex, f, a, b, g)
+global pIndex pF pA pB pG pMaxIterations pEps;
+pIndex = selectedIndex;
+pF = f;
+pA = a;
+pB = b;
+pG = g;
+
+function setIterPlotData(iterTable)
+global pIter;
+pIter = iterTable;
 
 % --- Executes on button press in solveButton.
 function solveButton_Callback(hObject, eventdata, handles)
-global changedData;
+global changedData selectedIndex;
 changedData = true;
 warning('off','all')
 selectedIndex = get(handles.popupmenu1, 'Value');
@@ -188,6 +204,7 @@ a1 = str2num(get(handles.mainStartBox, 'string'));
 b = str2num(get(handles.endBox, 'string'));
 maxIterations = str2num(get(handles.itLabel, 'string'));
 eps = str2num(get(handles.percLabel, 'string'));
+setConstPlotData(selectedIndex, f, a, b, g)
 [mRoot,mIterations,mHeader,mIterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
 [oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
 setMainData(mRoot,mIterations,mHeader,mIterTable,mPrecision,mTime, handles);
@@ -213,6 +230,7 @@ try
             errordlg('Wrong method!');
             return;
     end
+    setIterPlotData(IterTable(1:length(header)));
 catch ME
     errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
         ME.stack(1).name, ME.stack(1).line, ME.message);
@@ -415,3 +433,61 @@ function mainStartBox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+function plot_Callback(hObject, eventdata, handles)
+global pIndex pF pA pB pG pMaxIterations pEps pIter;
+axes(handles.axes1);
+try
+    switch pIndex
+        case 1
+            syms x y
+            cla;
+            ezplot(pF, [pA, pB]);
+            val1 = eval(subs(pF, pA));
+            val2 = eval(subs(pF, pB));
+            maxVal = max(abs(val1), abs(val2));
+            hold on;
+            plot([pA, pB], [0 0], 'k-');
+            hold on;
+            plot([0, 0], [pA pB], 'k-');
+            hold on;
+            plot([pIter(5), pIter(5)], [-maxVal, maxVal], '--'); 
+            hold on;
+            plot([pIter(1), pIter(1)], [-maxVal, maxVal]);
+            hold on;
+            plot([pIter(3), pIter(3)], [-maxVal, maxVal]);            
+            %[root,iterations,header,IterTable,precision,time] = bisection(f, a, b, maxIterations,eps);
+        case 2
+            %[root,iterations,header,IterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps);
+        case 3
+            %[ root,iterations,header,IterTable,precision,time ] = fixed_point( f,a,g, maxIterations, eps );
+        case 4
+            %[root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a,maxIterations,eps,eps);
+        case 5
+            %[root,iterations,header,IterTable,precision,time] = Secant(f,a, b,maxIterations,eps,eps);
+        case 6
+            %[root,iterations,header,IterTable,precision,time] = birgeVieta(f,a,eps,maxIterations);
+        otherwise
+            errordlg('Wrong Plotting data!');
+            return;
+    end    
+catch ME
+    errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
+        ME.stack(1).name, ME.stack(1).line, ME.message);
+    fprintf(1, '%s\n', errorMessage);
+    uiwait(errordlg(errorMessage));
+end
+
+
+% --- Executes on button press in funcPlotter.
+function funcPlotter_Callback(hObject, eventdata, handles)
+f = get(handles.funcBox, 'string');
+a = str2num(get(handles.startBox, 'string'));
+b = str2num(get(handles.endBox, 'string'));
+cla;
+ezplot(f, [a, b]);
+hold on;
+plot([a, b], [0 0], 'k-');
+hold on;
+plot([0, 0], [a b], 'k-');
