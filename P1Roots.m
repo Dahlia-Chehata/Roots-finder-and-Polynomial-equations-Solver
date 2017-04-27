@@ -227,7 +227,7 @@ try
     end
     setIterPlotData(IterTable(1:length(header)));
 catch ME
-    errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
+    errorMessage = sprintf('Error Message:\n%s', ...
         ME.stack(1).name, ME.stack(1).line, ME.message);
     fprintf(1, '%s\n', errorMessage);
     uiwait(errordlg(errorMessage));
@@ -245,7 +245,7 @@ warning('off','all')
 try
     [root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a1,maxIterations,eps);
 catch ME
-    errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
+    errorMessage = sprintf('Error Message:\n%s', ...
         ME.stack(1).name, ME.stack(1).line, ME.message);
     fprintf(1, '%s\n', errorMessage);
     uiwait(errordlg(errorMessage));
@@ -277,7 +277,7 @@ try
         set(handles.extraFuncBox, 'enable', 'off');
     end
 catch ME
-    errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
+    errorMessage = sprintf('Error Message:\n%s', ...
         ME.stack(1).name, ME.stack(1).line, ME.message);
     fprintf(1, '%s\n', errorMessage);
     uiwait(errordlg(errorMessage));

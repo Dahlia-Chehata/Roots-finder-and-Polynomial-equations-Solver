@@ -1,7 +1,9 @@
-function [ root,iterations,header,IterTable,precision,time] = fixed_point( f,a,g, maxIterations, eps )
+function [root,iterations,header,IterTable,precision,time] = fixed_point( f,a,g, maxIterations, eps )
 tic;
+if(isempty(g))
+    error('Extra function is required');
+end
 syms x;
-i = 0;
 xr = a;
 IterTable = zeros(0,4);
 iterations = 0;
@@ -23,5 +25,4 @@ end
 root = xr;
 precision=eval(subs(f, root));
 time=toc;
-bound = 'undefined';
 end
