@@ -462,13 +462,9 @@ catch ME
     uiwait(errordlg(errorMessage));
 end
 
-function [x1,x2] = getPlotData(handles)
-x1 = str2num(get(handles.plotStartX, 'string'));
-x2 = str2num(get(handles.plotEndX, 'string'));
 
-
-function plotBisection(handles)
-global pF pA pB pIter;
+function drawFunction(handles)
+global pF;
 [x1 x2] = getPlotData(handles);
 syms x y;
 cla;
@@ -479,6 +475,15 @@ hold on;
 %Large values are used for long vertical axis
 plot([0, 0], [-500000 500000], 'k-');
 hold on;
+
+function [x1,x2] = getPlotData(handles)
+x1 = str2num(get(handles.plotStartX, 'string'));
+x2 = str2num(get(handles.plotEndX, 'string'));
+
+
+function plotBisection(handles)
+global pIter;
+drawFunction(handles);
 plot([pIter(5), pIter(5)], [-500000, 500000], '--');
 hold on;
 plot([pIter(1), pIter(1)], [-500000, 500000]);
@@ -486,17 +491,9 @@ hold on;
 plot([pIter(3), pIter(3)], [-500000, 500000]);
 
 function plotRegulaFalsi(handles)
-global pF pA pB pIter;
-[x1 x2] = getPlotData(handles);
-syms x y;
-cla;
-ezplot(pF, [x1, x2]);
-hold on;
-plot([x1, x2], [0 0], 'k-');
-hold on;
-%Large values are used for long vertical axis
-plot([0, 0], [-500000 500000], 'k-');
-hold on;
+global pF pIter;
+drawFunction(handles);
+syms x;
 plot([pIter(1) pIter(2)], [eval(subs(pF, pIter(1))) eval(subs(pF, pIter(2)))]);
 plot([pIter(3), pIter(3)], [-500000 500000], 'k-');
 plot([pIter(1), pIter(1)], [-500000 500000], 'k-');
