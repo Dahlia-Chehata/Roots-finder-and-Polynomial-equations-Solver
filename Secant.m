@@ -1,4 +1,4 @@
-function [root,iterations,header,IterTable,precision,time] = Secant(f,a, b,MaxIterations,eps,es)
+function [root,iterations,header,IterTable,precision,time] = Secant(f,a, b,MaxIterations,eps)
 tic;
 x = zeros(1,MaxIterations);
 x(1)=a;
@@ -9,6 +9,7 @@ for i=2:1:MaxIterations + 1
     fNew = eval(subs(f,x(i)));
     fOld = eval(subs(f,x(i - 1)));
     if(abs(fOld - fNew) <= eps)
+        break;
         error('the denominator is equal to zero');
     else
         x(i+1) = x(i) - ((fNew * (x(i - 1) - x(i)))/(fOld - fNew));
@@ -17,7 +18,7 @@ for i=2:1:MaxIterations + 1
         IterTable=[IterTable;row];
     end
     check=abs(double(eval(subs(f,x(i+1)))));
-    if (check<=eps || abs(ea)<=es)
+    if (check<=eps || abs(ea)<=eps)
         root=x(i+1);
         time = toc;
         break;

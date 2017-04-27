@@ -20,7 +20,7 @@ end
 
 
 % --- Executes just before P1Roots is made visible.
-function P1Roots_OpeningFcn(hObject, eventdata, handles, varargin)
+function P1Roots_OpeningFcn(hObject, ~, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -38,7 +38,7 @@ guidata(hObject, handles);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = P1Roots_OutputFcn(hObject, eventdata, handles)
+function varargout = P1Roots_OutputFcn(~, ~, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -48,37 +48,30 @@ function varargout = P1Roots_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 
-function mxItBox_Callback(hObject, eventdata, handles)
+function mxItBox_Callback(hObject, ~, ~)
 text = get(hObject, 'string');
-number = str2num(text);
-if isempty(str2num(text))
+if isempty(str2double(text))
     set(hObject,'string','0');
     errordlg('Input must be an integer');
 end
 
 % --- Executes during object creation, after setting all properties.
-function mxItBox_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to mxItBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
+function mxItBox_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
 
-function percBox_Callback(hObject, eventdata, handles)
+function percBox_Callback(hObject, ~, ~)
 text = get(hObject, 'string');
-if isempty(str2num(text))
+if isempty(str2double(text))
     set(hObject,'string','0');
     errordlg('Input must be numerical');
 end
 
 % --- Executes during object creation, after setting all properties.
-function percBox_CreateFcn(hObject, eventdata, handles)
+function percBox_CreateFcn(hObject, ~, ~)
 % hObject    handle to percBox (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -138,6 +131,7 @@ if(changedData == true)
     getGlobalData(handles);
 end
 setGlobalData(handles);
+plotGraph(handles);
 
 
 function getGlobalData(handles)
@@ -154,7 +148,7 @@ a1 = str2num(get(handles.mainStartBox, 'string'));
 b = str2num(get(handles.endBox, 'string'));
 maxIterations = str2num(get(handles.itLabel, 'string'));
 eps = str2num(get(handles.percLabel, 'string'));
-setConstPlotData(selectedIndex, f, a, b, g)
+setConstPlotData(selectedIndex, f, a, b, g);
 [mRoot,mIterations,mHeader,mIterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
 [oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
 changedData = false;
@@ -195,7 +189,6 @@ pIter = iterTable;
 function solveButton_Callback(hObject, eventdata, handles)
 global changedData selectedIndex;
 changedData = true;
-warning('off','all')
 selectedIndex = get(handles.popupmenu1, 'Value');
 f = get(handles.funcBox, 'string');
 g = get(handles.extraFuncBox, 'string');
@@ -209,9 +202,11 @@ setConstPlotData(selectedIndex, f, a, b, g)
 [oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
 setMainData(mRoot,mIterations,mHeader,mIterTable,mPrecision,mTime, handles);
 setOptData(oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime, handles);
+plotGraph(handles);
 
 
 function [root,iterations,header,IterTable,precision,time] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles)
+warning('off','all')
 try
     switch selectedIndex
         case 1
@@ -221,9 +216,9 @@ try
         case 3
             [ root,iterations,header,IterTable,precision,time ] = fixed_point( f,a,g, maxIterations, eps );
         case 4
-            [root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a,maxIterations,eps,eps);
+            [root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a,maxIterations,eps);
         case 5
-            [root,iterations,header,IterTable,precision,time] = Secant(f,a, b,maxIterations,eps,eps);
+            [root,iterations,header,IterTable,precision,time] = Secant(f,a, b,maxIterations,eps);
         case 6
             [root,iterations,header,IterTable,precision,time] = birgeVieta(f,a,eps,maxIterations);
         otherwise
@@ -246,8 +241,9 @@ set(handles.optTimeLabel, 'string', time);
 buildTable(handles.optTable,header, IterTable)
 
 function [root,iterations,header,IterTable,precision,time] = solveMainAlgorithm(f, a1, maxIterations, eps, handles)
+warning('off','all')
 try
-    [root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a1,maxIterations,eps,eps);
+    [root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a1,maxIterations,eps);
 catch ME
     errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
         ME.stack(1).name, ME.stack(1).line, ME.message);
@@ -436,58 +432,217 @@ end
 
 
 function plot_Callback(hObject, eventdata, handles)
-global pIndex pF pA pB pG pMaxIterations pEps pIter;
+plotGraph(handles);
+
+function plotGraph(handles)
+global pIndex pF pA pB pG pIter;
 axes(handles.axes1);
 try
     switch pIndex
         case 1
-            syms x y
-            cla;
-            ezplot(pF, [pA, pB]);
-            val1 = eval(subs(pF, pA));
-            val2 = eval(subs(pF, pB));
-            maxVal = max(abs(val1), abs(val2));
-            hold on;
-            plot([pA, pB], [0 0], 'k-');
-            hold on;
-            plot([0, 0], [pA pB], 'k-');
-            hold on;
-            plot([pIter(5), pIter(5)], [-maxVal, maxVal], '--'); 
-            hold on;
-            plot([pIter(1), pIter(1)], [-maxVal, maxVal]);
-            hold on;
-            plot([pIter(3), pIter(3)], [-maxVal, maxVal]);            
-            %[root,iterations,header,IterTable,precision,time] = bisection(f, a, b, maxIterations,eps);
+            plotBisection(handles);
         case 2
-            %[root,iterations,header,IterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps);
+            plotRegulaFalsi(handles);
         case 3
-            %[ root,iterations,header,IterTable,precision,time ] = fixed_point( f,a,g, maxIterations, eps );
+            plotFixedPoint(handles);
         case 4
-            %[root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a,maxIterations,eps,eps);
+            %[root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a,maxIterations,eps);
         case 5
-            %[root,iterations,header,IterTable,precision,time] = Secant(f,a, b,maxIterations,eps,eps);
+            %[root,iterations,header,IterTable,precision,time] = Secant(f,a, b,maxIterations,eps);
         case 6
             %[root,iterations,header,IterTable,precision,time] = birgeVieta(f,a,eps,maxIterations);
         otherwise
             errordlg('Wrong Plotting data!');
             return;
-    end    
+    end
 catch ME
-    errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
-        ME.stack(1).name, ME.stack(1).line, ME.message);
+    errorMessage = sprintf('Err Message:\n%s', ...
+        ME.message);
+    fprintf(1, '%s\n', errorMessage);
+    uiwait(errordlg(errorMessage));
+end
+
+function [x1,x2] = getPlotData(handles)
+x1 = str2num(get(handles.plotStartX, 'string'));
+x2 = str2num(get(handles.plotEndX, 'string'));
+
+
+function plotBisection(handles)
+global pF pA pB pIter;
+[x1 x2] = getPlotData(handles);
+syms x y;
+cla;
+ezplot(pF, [x1, x2]);
+hold on;
+plot([x1, x2], [0 0], 'k-');
+hold on;
+%Large values are used for long vertical axis
+plot([0, 0], [-500000 500000], 'k-');
+hold on;
+plot([pIter(5), pIter(5)], [-500000, 500000], '--');
+hold on;
+plot([pIter(1), pIter(1)], [-500000, 500000]);
+hold on;
+plot([pIter(3), pIter(3)], [-500000, 500000]);
+
+function plotRegulaFalsi(handles)
+global pF pA pB pIter;
+[x1 x2] = getPlotData(handles);
+syms x y;
+cla;
+ezplot(pF, [x1, x2]);
+hold on;
+plot([x1, x2], [0 0], 'k-');
+hold on;
+%Large values are used for long vertical axis
+plot([0, 0], [-500000 500000], 'k-');
+hold on;
+plot([pIter(1) pIter(2)], [eval(subs(pF, pIter(1))) eval(subs(pF, pIter(2)))]);
+plot([pIter(3), pIter(3)], [-500000 500000], 'k-');
+plot([pIter(1), pIter(1)], [-500000 500000], 'k-');
+plot([pIter(2), pIter(2)], [-500000 500000], 'k-');
+
+function plotFixedPoint(handles)
+global pF pA pB pG pIter;
+[x1 x2] = getPlotData(handles);
+syms x y;
+cla;
+ezplot(pF, [x1, x2]);
+ezplot(pG, [x1, x2]);
+hold on;
+plot([x1, x2], [0 0], 'k-');
+hold on;
+%Large values are used for long vertical axis
+plot([0, 0], [-500000 500000], 'k-');
+hold on;
+plot([0, 0], [1,1]);
+plot([pIter(2), pIter(2)], [-500000 500000], 'k-');
+
+% --- Executes on button press in funcPlotter.
+function funcPlotter_Callback(hObject, eventdata, handles)
+try
+    f = get(handles.funcBox, 'string');
+    a = str2num(get(handles.plotStartX, 'string'));
+    b = str2num(get(handles.plotEndX, 'string'));
+    if(a >= b)
+        error('Wrong Plotting data!');
+    end
+    cla;
+    ezplot(f, [a, b]);
+    hold on;
+    plot([a, b], [0 0], 'k-');
+    hold on;
+    plot([0, 0], [-500000 500000], 'k-');
+    %%large values are used in drawing the vertical axis just to get
+    %% a large enough line.
+catch ME
+    errorMessage = sprintf('Error Message:\n%s', ...
+        ME.message);
     fprintf(1, '%s\n', errorMessage);
     uiwait(errordlg(errorMessage));
 end
 
 
-% --- Executes on button press in funcPlotter.
-function funcPlotter_Callback(hObject, eventdata, handles)
-f = get(handles.funcBox, 'string');
-a = str2num(get(handles.startBox, 'string'));
-b = str2num(get(handles.endBox, 'string'));
-cla;
-ezplot(f, [a, b]);
-hold on;
-plot([a, b], [0 0], 'k-');
-hold on;
-plot([0, 0], [a b], 'k-');
+
+function plotStartX_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function plotStartX_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function plotEndX_Callback(hObject, eventdata, handles)
+
+% --- Executes during object creation, after setting all properties.
+function plotEndX_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in plotAll.
+function plotAll_Callback(hObject, eventdata, handles)
+try
+maxIterations = str2num(get(handles.itLabel, 'string'));
+eps = str2num(get(handles.percLabel, 'string'));
+inputFile = fopen('allinput.txt', 'r');
+[f, biA, biB, rfA, rfB, fpA, g, npA, secA, secB, bvA] = readData(inputFile);
+[~,~,~,biIterTable] = bisection(f, biA, biB, maxIterations,eps);
+[~,~,~,rfIterTable] = regulafalsi(f,rfA, rfB, maxIterations,eps);
+[~,~,~,fpIterTable] = fixed_point( f,fpA,g, maxIterations, eps );
+[~,~,~,npIterTable] = NewtonRaphson(f,npA,maxIterations,eps);
+[root,~,~,secIterTable] = Secant(f,secA, secB,maxIterations,eps);
+[~,~,~,bvIterTable] = birgeVieta(f,bvA,eps,maxIterations);
+biIterTable = biIterTable(1:size(biIterTable), 5:5);
+rfIterTable = rfIterTable(1:size(rfIterTable), 3:3);
+fpIterTable = fpIterTable(1:size(fpIterTable), 2:2);
+npIterTable = npIterTable(1:size(npIterTable), 4:4);
+secIterTable = secIterTable(1:size(secIterTable), 3:3);
+bvIterTable = bvIterTable(1:size(bvIterTable), 2:2);
+plotAllIterations(biIterTable, rfIterTable, fpIterTable, npIterTable, secIterTable, bvIterTable, handles);
+catch ME
+    errorMessage = sprintf('Error in function %s()\nError Message:\n%s', ...
+        ME.stack(1).name, ME.message);
+    fprintf(1, '%s\n', errorMessage);
+    uiwait(errordlg(errorMessage));
+end
+
+function [f, biA, biB, rfA, rfB, fpA, g, npA, secA, secB, bvA] = readData(inputFile)
+[f] = readFunction(inputFile);
+[biA, biB] = readIntervalRanges(inputFile);
+[rfA, rfB] = readIntervalRanges(inputFile);
+[fpA, g] = readFunctionWithData(inputFile);
+[npA] = readStartingPoint(inputFile);
+[secA, secB] = readIntervalRanges(inputFile);
+[bvA] = readStartingPoint(inputFile);
+
+
+function [f] = readFunction(inputFile)
+f = fscanf(inputFile,'%s',1);
+
+function [a, b] = readIntervalRanges(inputFile)
+C = fscanf(inputFile,' %s',1);
+a = str2double(C);
+C = fscanf(inputFile,' %s',1);
+b = str2double(C);
+
+function [a] = readStartingPoint(inputFile)
+C = fscanf(inputFile,' %s',1);
+a = str2double(C);
+
+function [fpA, g] = readFunctionWithData(inputFile)
+[fpA] = readStartingPoint(inputFile);
+[g] = readFunction(inputFile);
+
+function plotAllIterations(biIterTable, rfIterTable, fpIterTable, npIterTable, secIterTable, bvIterTable, handles)
+maxSize = max(size(biIterTable), size(rfIterTable));
+maxSize1 = max(size(fpIterTable), size(npIterTable));
+maxSize2 = max(size(secIterTable), size(bvIterTable));
+maxSize1 = max(maxSize1, maxSize2);
+maxSize = max(maxSize1, maxSize);
+[biIterTable] = fix(biIterTable, maxSize);
+[rfIterTable] = fix(rfIterTable, maxSize);
+[fpIterTable] = fix(fpIterTable, maxSize);
+[npIterTable] = fix(npIterTable, maxSize);
+[secIterTable] = fix(secIterTable, maxSize);
+[bvIterTable] = fix(bvIterTable, maxSize);
+t = 1:maxSize;
+c = horzcat(biIterTable, rfIterTable, fpIterTable, npIterTable, secIterTable, bvIterTable);
+axes(handles.axes1);
+plot(t, c);
+legend('Bisection','False Position','Fixed Point','Newt. Raph.','Birge V.');
+
+function [b] = fix(a, bSize)
+b = zeros(bSize);
+aSize = size(a);
+aSize = aSize(1, 1);
+for i = 1:bSize
+    if(i <= aSize)
+        b(i) = a(i);
+    else
+        b(i) = a(aSize);
+    end
+end

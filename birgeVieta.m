@@ -14,7 +14,6 @@ while (check)
     c=[];
     b(order)= a(order);
     c(order)= a(order);
-    disp(order);
     for i=order-1:-1:1
         b(i)= a(i)+x(cnt)*b(i+1);
         if i > 1
@@ -40,7 +39,6 @@ while (check)
 end
 root=x(cnt);
 iterations=cnt-1;
-bound = 'undefined';
 time = toc;
 precision=polyval(coeff,root);
 end
