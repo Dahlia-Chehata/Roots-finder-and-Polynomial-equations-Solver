@@ -124,8 +124,8 @@ end
 % --- Executes on button press in stepButton.
 function stepButton_Callback(hObject, eventdata, handles)
 global changedData;
-global mRoot mIterations mHeader mIterTable mPrecision mTime;
-global oRoot oIterations oHeader oIterTable oPrecision oTime
+global mRoot mIterations mHeader miterTable mPrecision mTime;
+global oRoot oIterations oHeader oiterTable oPrecision oTime
 global ind1 ind2;
 if(changedData == true)
     getGlobalData(handles);
@@ -137,8 +137,8 @@ plotGraph(handles);
 function getGlobalData(handles)
 global ind1 ind2;
 global changedData;
-global mRoot mIterations mHeader mIterTable mPrecision mTime;
-global oRoot oIterations oHeader oIterTable oPrecision oTime;
+global mRoot mIterations mHeader miterTable mPrecision mTime;
+global oRoot oIterations oHeader oiterTable oPrecision oTime;
 global selectedIndex;
 selectedIndex = get(handles.popupmenu1, 'Value');
 f = get(handles.funcBox, 'string');
@@ -149,8 +149,8 @@ b = str2num(get(handles.endBox, 'string'));
 maxIterations = str2num(get(handles.itLabel, 'string'));
 eps = str2num(get(handles.percLabel, 'string'));
 setConstPlotData(selectedIndex, f, a, b, g);
-[mRoot,mIterations,mHeader,mIterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
-[oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
+[mRoot,mIterations,mHeader,miterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
+[oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
 changedData = false;
 ind1 = 0;
 ind2 = 0;
@@ -158,19 +158,19 @@ ind2 = 0;
 function setGlobalData(handles)
 global ind1 ind2;
 global changedData;
-global mRoot mIterations mHeader mIterTable mPrecision mTime;
-global oRoot oIterations oHeader oIterTable oPrecision oTime;
+global mRoot mIterations mHeader miterTable mPrecision mTime;
+global oRoot oIterations oHeader oiterTable oPrecision oTime;
 global selectedIndex;
 if(changedData == false)
     ind1 = ind1 + 1;
     ind2 = ind2 + 1;
     h1 = length(mHeader);
     h2 = length(oHeader);
-    mMaxSize = min(ind1, size(mIterTable,1));
-    oMaxSize = min(ind2, size(oIterTable,1));
-    setIterPlotData(oIterTable(oMaxSize:oMaxSize, 1:h2));
-    setMainData(mRoot,mIterations,mHeader,mIterTable(1:mMaxSize, 1 : h1),mPrecision,mTime, handles);
-    setOptData(oRoot,oIterations,oHeader,oIterTable(1:oMaxSize, 1:h2),oPrecision,oTime, handles);
+    mMaxSize = min(ind1, size(miterTable,1));
+    oMaxSize = min(ind2, size(oiterTable,1));
+    setIterPlotData(oiterTable(oMaxSize:oMaxSize, 1:h2));
+    setMainData(mRoot,mIterations,mHeader,miterTable(1:mMaxSize, 1 : h1),mPrecision,mTime, handles);
+    setOptData(oRoot,oIterations,oHeader,oiterTable(1:oMaxSize, 1:h2),oPrecision,oTime, handles);
 end
 
 function setConstPlotData(selectedIndex, f, a, b, g)
@@ -192,40 +192,41 @@ changedData = true;
 selectedIndex = get(handles.popupmenu1, 'Value');
 f = get(handles.funcBox, 'string');
 g = get(handles.extraFuncBox, 'string');
-a = str2num(get(handles.startBox, 'string'));
-a1 = str2num(get(handles.mainStartBox, 'string'));
-b = str2num(get(handles.endBox, 'string'));
-maxIterations = str2num(get(handles.itLabel, 'string'));
-eps = str2num(get(handles.percLabel, 'string'));
+a = str2double(get(handles.startBox, 'string'));
+a1 = str2double(get(handles.mainStartBox, 'string'));
+b = str2double(get(handles.endBox, 'string'));
+maxIterations = str2double(get(handles.itLabel, 'string'));
+eps = str2double(get(handles.percLabel, 'string'));
 setConstPlotData(selectedIndex, f, a, b, g)
-[mRoot,mIterations,mHeader,mIterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
-[oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
-setMainData(mRoot,mIterations,mHeader,mIterTable,mPrecision,mTime, handles);
-setOptData(oRoot,oIterations,oHeader,oIterTable,oPrecision,oTime, handles);
+[mRoot,mIterations,mHeader,miterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
+[oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
+setMainData(mRoot,mIterations,mHeader,miterTable,mPrecision,mTime, handles);
+setOptData(oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime, handles);
 plotGraph(handles);
 
 
-function [root,iterations,header,IterTable,precision,time] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles)
-warning('off','all')
+function [root,iterations,header,iterTable,precision,time] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles)
+warning('off','all');
 try
     switch selectedIndex
         case 1
-            [root,iterations,header,IterTable,precision,time] = bisection(f, a, b, maxIterations,eps);
+            [root,iterations,header,iterTable,precision,time] = bisection(f, a, b, maxIterations,eps);
         case 2
-            [root,iterations,header,IterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps);
+            [root,iterations,header,iterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps);
         case 3
-            [ root,iterations,header,IterTable,precision,time ] = fixed_point( f,a,g, maxIterations, eps );
+            [ root,iterations,header,iterTable,precision,time ] = fixed_point( f,a,g, maxIterations, eps );
         case 4
-            [root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a,maxIterations,eps);
+            [root,iterations,header,iterTable,precision,time] = NewtonRaphson(f,a,maxIterations,eps);
         case 5
-            [root,iterations,header,IterTable,precision,time] = Secant(f,a, b,maxIterations,eps);
+            [root,iterations,header,iterTable,precision,time] = Secant(f,a, b,maxIterations,eps);
         case 6
-            [root,iterations,header,IterTable,precision,time] = birgeVieta(f,a,eps,maxIterations);
+            [root,iterations,header,iterTable,precision,time] = birgeVieta(f,a,eps,maxIterations);
         otherwise
             errordlg('Wrong method!');
             return;
     end
-    setIterPlotData(IterTable(1:length(header)));
+    setIterPlotData(iterTable(1:length(header)));
+    writeSolution(iterTable, header, 'optional method solution.xls');
 catch ME
     errorMessage = sprintf('Error Message:\n%s', ...
         ME.stack(1).name, ME.stack(1).line, ME.message);
@@ -233,17 +234,18 @@ catch ME
     uiwait(errordlg(errorMessage));
 end
 
-function setOptData(root,iterations,header,IterTable,precision,time, handles)
+function setOptData(root,iterations,header,iterTable,precision,time, handles)
 set(handles.optRootLabel, 'string', root);
 set(handles.optIterationsLabel, 'string', iterations);
 set(handles.optPrecisionLabel, 'string', precision);
 set(handles.optTimeLabel, 'string', time);
-buildTable(handles.optTable,header, IterTable)
+buildTable(handles.optTable,header, iterTable)
 
-function [root,iterations,header,IterTable,precision,time] = solveMainAlgorithm(f, a1, maxIterations, eps, handles)
+function [root,iterations,header,iterTable,precision,time] = solveMainAlgorithm(f, a1, maxIterations, eps, handles)
 warning('off','all')
 try
-    [root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a1,maxIterations,eps);
+    [root,iterations,header,iterTable,precision,time] = NewtonRaphson(f,a1,maxIterations,eps);
+    writeSolution(iterTable, header, 'main method solution.xls');
 catch ME
     errorMessage = sprintf('Error Message:\n%s', ...
         ME.stack(1).name, ME.stack(1).line, ME.message);
@@ -251,12 +253,12 @@ catch ME
     uiwait(errordlg(errorMessage));
 end
 
-function setMainData(root,iterations,header,IterTable,precision,time, handles)
+function setMainData(root,iterations,header,iterTable,precision,time, handles)
 set(handles.mainRootLabel, 'string', root);
 set(handles.mainIterationsLabel, 'string', iterations);
 set(handles.mainPrecisionLabel, 'string', precision);
 set(handles.mainTimeLabel, 'string', time);
-buildTable(handles.mainTable,header, IterTable)
+buildTable(handles.mainTable,header, iterTable)
 
 % --- Executes on selection change in popupmenu1.
 function popupmenu1_Callback(hObject, eventdata, handles)
@@ -327,6 +329,7 @@ function funcBox_Callback(hObject, eventdata, handles)
 global changedData;
 changedData = true;
 
+
 % --- Executes during object creation, after setting all properties.
 function funcBox_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to funcBox (see GCBO)
@@ -345,8 +348,7 @@ function startBox_Callback(hObject, eventdata, handles)
 global changedData;
 changedData = true;
 text = get(hObject, 'string');
-number = str2num(text);
-if isempty(str2num(text))
+if isempty(str2double(text))
     set(hObject,'string','0');
     errordlg('Input must be an numerical');
 end
@@ -369,8 +371,7 @@ function endBox_Callback(hObject, eventdata, handles)
 global changedData;
 changedData = true;
 text = get(hObject, 'string');
-number = str2num(text);
-if isempty(str2num(text))
+if isempty(str2double(text))
     set(hObject,'string','0');
     errordlg('Input must be an numerical');
 end
@@ -446,11 +447,11 @@ try
         case 3
             plotFixedPoint(handles);
         case 4
-            %[root,iterations,header,IterTable,precision,time] = NewtonRaphson(f,a,maxIterations,eps);
+            plotNewtonRphason(handles);
         case 5
-            %[root,iterations,header,IterTable,precision,time] = Secant(f,a, b,maxIterations,eps);
+            plotSecant(handles);
         case 6
-            %[root,iterations,header,IterTable,precision,time] = birgeVieta(f,a,eps,maxIterations);
+            errordlg('Cannot plot Birge-Vieta''s method!');
         otherwise
             errordlg('Wrong Plotting data!');
             return;
@@ -465,7 +466,7 @@ end
 
 function drawFunction(handles)
 global pF;
-[x1 x2] = getPlotData(handles);
+[x1, x2] = getPlotData(handles);
 syms x y;
 cla;
 ezplot(pF, [x1, x2]);
@@ -477,8 +478,8 @@ plot([0, 0], [-500000 500000], 'k-');
 hold on;
 
 function [x1,x2] = getPlotData(handles)
-x1 = str2num(get(handles.plotStartX, 'string'));
-x2 = str2num(get(handles.plotEndX, 'string'));
+x1 = str2double(get(handles.plotStartX, 'string'));
+x2 = str2double(get(handles.plotEndX, 'string'));
 
 
 function plotBisection(handles)
@@ -500,8 +501,8 @@ plot([pIter(1), pIter(1)], [-500000 500000], 'k-');
 plot([pIter(2), pIter(2)], [-500000 500000], 'k-');
 
 function plotFixedPoint(handles)
-global pF pA pB pG pIter;
-[x1 x2] = getPlotData(handles);
+global pF pG pIter;
+[x1, x2] = getPlotData(handles);
 syms x y;
 cla;
 ezplot(pF, [x1, x2]);
@@ -515,12 +516,44 @@ hold on;
 plot([0, 0], [1,1]);
 plot([pIter(2), pIter(2)], [-500000 500000], 'k-');
 
+
+function plotNewtonRphason (handles)
+global pIter;
+drawFunction(handles);
+plot([pIter(1), pIter(1)], [-500000, 500000], 'g-');
+m = pIter(3);
+c = pIter(2) - m * pIter(1);
+x1 = 500000;
+y1 = m * x1 + c;
+x2 = -500000;
+y2 = m * x2 + c;
+plot([x1, x2],[y1, y2], 'r-');
+plot([pIter(4), pIter(4)], [-500000, 500000], 'y-');
+
+
+function plotSecant(handles)
+global pIter;
+drawFunction(handles);
+plot([pIter(1), pIter(1)], [-500000, 500000], 'g-');
+plot([pIter(2), pIter(2)], [-500000, 500000], 'y-');
+m = (pIter(4) - pIter(5))/(pIter(1) - pIter(2));
+c = pIter(4) - m * pIter(1);
+x1 = 500000;
+y1 = m * x1 + c;
+x2 = -500000;
+y2 = m * x2 + c;
+plot([x1, x2],[y1, y2], 'r-');
+plot([pIter(3), pIter(3)],[-500000 500000],'m-');
+
+
+
+
 % --- Executes on button press in funcPlotter.
 function funcPlotter_Callback(hObject, eventdata, handles)
 try
     f = get(handles.funcBox, 'string');
-    a = str2num(get(handles.plotStartX, 'string'));
-    b = str2num(get(handles.plotEndX, 'string'));
+    a = str2double(get(handles.plotStartX, 'string'));
+    b = str2double(get(handles.plotEndX, 'string'));
     if(a >= b)
         error('Wrong Plotting data!');
     end
@@ -562,24 +595,25 @@ end
 
 % --- Executes on button press in plotAll.
 function plotAll_Callback(hObject, eventdata, handles)
+warning('off','all');
 try
-maxIterations = str2num(get(handles.itLabel, 'string'));
-eps = str2num(get(handles.percLabel, 'string'));
-inputFile = fopen('allinput.txt', 'r');
-[f, biA, biB, rfA, rfB, fpA, g, npA, secA, secB, bvA] = readData(inputFile);
-[~,~,~,biIterTable] = bisection(f, biA, biB, maxIterations,eps);
-[~,~,~,rfIterTable] = regulafalsi(f,rfA, rfB, maxIterations,eps);
-[~,~,~,fpIterTable] = fixed_point( f,fpA,g, maxIterations, eps );
-[~,~,~,npIterTable] = NewtonRaphson(f,npA,maxIterations,eps);
-[root,~,~,secIterTable] = Secant(f,secA, secB,maxIterations,eps);
-[~,~,~,bvIterTable] = birgeVieta(f,bvA,eps,maxIterations);
-biIterTable = biIterTable(1:size(biIterTable), 5:5);
-rfIterTable = rfIterTable(1:size(rfIterTable), 3:3);
-fpIterTable = fpIterTable(1:size(fpIterTable), 2:2);
-npIterTable = npIterTable(1:size(npIterTable), 4:4);
-secIterTable = secIterTable(1:size(secIterTable), 3:3);
-bvIterTable = bvIterTable(1:size(bvIterTable), 2:2);
-plotAllIterations(biIterTable, rfIterTable, fpIterTable, npIterTable, secIterTable, bvIterTable, handles);
+    maxIterations = str2num(get(handles.itLabel, 'string'));
+    eps = str2num(get(handles.percLabel, 'string'));
+    inputFile = fopen('allinput.txt', 'r');
+    [f, biA, biB, rfA, rfB, fpA, g, npA, secA, secB, bvA] = readData(inputFile);
+    [~,~,~,biiterTable] = bisection(f, biA, biB, maxIterations,eps);
+    [~,~,~,rfiterTable] = regulafalsi(f,rfA, rfB, maxIterations,eps);
+    [~,~,~,fpiterTable] = fixed_point( f,fpA,g, maxIterations, eps );
+    [~,~,~,npiterTable] = NewtonRaphson(f,npA,maxIterations,eps);
+    [root,~,~,seciterTable] = Secant(f,secA, secB,maxIterations,eps);
+    [~,~,~,bviterTable] = birgeVieta(f,bvA,eps,maxIterations);
+    biiterTable = biiterTable(1:size(biiterTable), 5:5);
+    rfiterTable = rfiterTable(1:size(rfiterTable), 3:3);
+    fpiterTable = fpiterTable(1:size(fpiterTable), 2:2);
+    npiterTable = npiterTable(1:size(npiterTable), 4:4);
+    seciterTable = seciterTable(1:size(seciterTable), 3:3);
+    bviterTable = bviterTable(1:size(bviterTable), 2:2);
+    plotAllIterations(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable, handles);
 catch ME
     errorMessage = sprintf('Error in function %s()\nError Message:\n%s', ...
         ME.stack(1).name, ME.message);
@@ -614,20 +648,20 @@ function [fpA, g] = readFunctionWithData(inputFile)
 [fpA] = readStartingPoint(inputFile);
 [g] = readFunction(inputFile);
 
-function plotAllIterations(biIterTable, rfIterTable, fpIterTable, npIterTable, secIterTable, bvIterTable, handles)
-maxSize = max(size(biIterTable), size(rfIterTable));
-maxSize1 = max(size(fpIterTable), size(npIterTable));
-maxSize2 = max(size(secIterTable), size(bvIterTable));
+function plotAllIterations(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable, handles)
+maxSize = max(size(biiterTable), size(rfiterTable));
+maxSize1 = max(size(fpiterTable), size(npiterTable));
+maxSize2 = max(size(seciterTable), size(bviterTable));
 maxSize1 = max(maxSize1, maxSize2);
 maxSize = max(maxSize1, maxSize);
-[biIterTable] = fix(biIterTable, maxSize);
-[rfIterTable] = fix(rfIterTable, maxSize);
-[fpIterTable] = fix(fpIterTable, maxSize);
-[npIterTable] = fix(npIterTable, maxSize);
-[secIterTable] = fix(secIterTable, maxSize);
-[bvIterTable] = fix(bvIterTable, maxSize);
+[biiterTable] = fix(biiterTable, maxSize);
+[rfiterTable] = fix(rfiterTable, maxSize);
+[fpiterTable] = fix(fpiterTable, maxSize);
+[npiterTable] = fix(npiterTable, maxSize);
+[seciterTable] = fix(seciterTable, maxSize);
+[bviterTable] = fix(bviterTable, maxSize);
 t = 1:maxSize;
-c = horzcat(biIterTable, rfIterTable, fpIterTable, npIterTable, secIterTable, bvIterTable);
+c = horzcat(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable);
 axes(handles.axes1);
 plot(t, c);
 legend('Bisection','False Position','Fixed Point','Newt. Raph.','Birge V.');
