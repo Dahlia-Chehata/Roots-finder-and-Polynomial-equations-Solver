@@ -1,4 +1,4 @@
-function [x] = substitute(a, n, b, x)
+function [x] = substitute(a, n, b)
     x(n) = b(n) / a(n, n);
     i = n - 1;
     while i > 0

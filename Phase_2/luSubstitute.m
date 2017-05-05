@@ -1,4 +1,4 @@
-function [x] = luSubstitute(a, b, ind, n, x)
+function [x] = luSubstitute(a, b, ind, n)
     d = [];
     d(ind(1)) = b(ind(1));
     for i = 2 : n

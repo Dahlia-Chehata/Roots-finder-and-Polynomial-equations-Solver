@@ -1,4 +1,8 @@
-function [a, ind, scale, err] = decompose(a, scale, ind, n, tol, err)
+function [a, ind, err] = decompose(a, tol)
+    err = 0;
+    n = size(a, 1);
+    ind = zeros(n);
+    scale = zeros(n);
     for i = 1 : n
         ind(i) = i;
         scale(i) = abs(a(i, 1));
