@@ -18,10 +18,8 @@ end
 % End initialization code - DO NOT EDIT
 
 function phase2_OpeningFcn(hObject, eventdata, handles, varargin)
-global used_gaussian_jordan;
 global used_gauss_seidel;
 
-used_gaussian_jordan = false;
 used_gauss_seidel = false;
 handles.output = hObject;
 guidata(hObject, handles);
@@ -165,44 +163,39 @@ end
 function solve_btn_Callback(~, ~, handles)
 reset_tables(handles);
 
-global tolerance method input_equations bes used_gaussian_jordan used_gauss_seidel max_iterations epsillon initial_guesses;
-total_time = tic;
-if (method == 1 || method == 2)
+global tolerance method input_equations bes used_gauss_seidel max_iterations epsillon initial_guesses;
+if (method == 1 || method == 2 || method == 3)
     [header] = build_method_output_table_header();
+    error_flag = 0;
     if (method == 1)
         start = tic;
         [~, ans_matrix, error_flag] = gaussElemination(input_equations, bes, tolerance);
         method_time = toc(start);
-    else
+    elseif(method == 2);
         start = tic;
         [~, ans_matrix, error_flag] = luDecomposition(input_equations, bes, tolerance);
         method_time = toc(start);
+    elseif(method == 3)
+        start = tic;
+        [~, ans_matrix] = gaussJordan(input_equations, bes);
+        method_time = toc(start);
     end
     if error_flag ~= -1
-        set(handles.methods_output_table, 'data', ans_matrix);
-        set(handles.methods_output_table, 'Columnname', header);
+        set(handles.final_answer_table, 'data', ans_matrix);
+        set(handles.final_answer_table, 'Columnname', header);
     end
-    used_gaussian_jordan = false;
     used_gauss_seidel = false;
-elseif(method == 3 || method == 4)
+elseif(method == 4)
     [header] = build_iterative_output_table_header();
-    
-    if(method == 3)
-        start = tic;
-        % call of Jordan % <<=============================================
-        method_time = toc(start);
-        set(handles.gaussian_jordan_table, 'data', ans_matrix);
-        set(handles.gaussian_jordan_table, 'Columnname', header);
-        used_gaussian_jordan = true;
-    else
-        start = tic;
-        [ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
-        method_time = toc(start);
-        set(handles.gauss_seidel_table, 'data', ans_matrix);
-        set(handles.gauss_seidel_table, 'Columnname', header);
-        used_gauss_seidel = true;
-    end
+    start = tic;
+    [~, final_ans, ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
+    method_time = toc(start);
+    set(handles.gauss_seidel_table, 'data', ans_matrix);
+    set(handles.final_answer_table,'data', final_ans);
+    set(handles.gauss_seidel_table, 'Columnname', header);
+    used_gauss_seidel = true;
 elseif(method == 5)
+    total_time = tic;
     solve_all_methods(handles);
     set(handles.execution_time, 'string', toc(total_time));
     return;
@@ -233,10 +226,8 @@ for i = 1 : n
 end
 
 function solve_all_methods(handles)
-global tolerance input_equations bes used_gaussian_jordan used_gauss_seidel max_iterations epsillon initial_guesses;
+global tolerance input_equations bes used_gauss_seidel max_iterations epsillon initial_guesses;
 
-[header] = build_method_output_table_header();
-header = [header; {'Execution Time'}];
 %===================gaussElemination========
 time = tic;
 [method_name_1, temp_ans_matrix, error_flag] = gaussElemination(input_equations, bes, tolerance);
@@ -252,36 +243,31 @@ lu_decomposition_time = toc(time);
 if (error_flag ~= -1)
     ans_matrix = [ans_matrix; temp_ans_matrix];
 end
-%================Setting methods table=====================
-res_table = handles.methods_output_table;
-set(res_table, 'ColumnName', header);
-set(res_table, 'RowName', {method_name_1, method_name_2});
-set(res_table, 'data', [ans_matrix, [gauss_elemination_time; lu_decomposition_time]]);
-
-[header] = build_iterative_output_table_header();
 %====================gaussianJordan=======================
-%time = tic;
-% [ans_matrix] = call jordan;
-%gaussian_jordan_time = toc(time);
-%set(handles.gaussian_jordan_table, 'data', ans_matrix);
-%set(handles.gaussian_jordan_table, 'Columnname', header);
-%data = get(handles.gaussian_jordan_table, 'data');
-%data = [data; [gaussian_jordan_time; size(ans_matrix, 1)]];
-%set(handles.gaussian_jordan_table, 'data', data);
+time = tic;
+[method_name_3, temp_ans_matrix] = gaussJordan(input_equations, bes);
+ans_matrix = [ans_matrix; temp_ans_matrix];
+gauss_jordan_time = toc(time);
 
 %====================seidle==============================
-time = tic;
-[ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
-gauss_seidle_time = toc(time);
-sz = size(ans_matrix, 1);
-ans_matrix(sz + 1, 1) = gauss_seidle_time;
-ans_matrix(sz + 2, 1) = sz;
-set(handles.gauss_seidel_table, 'data', ans_matrix);
-set(handles.gauss_seidel_table, 'ColumnName', header);
-[rows] = build_iterative_table_rows_names(sz);
-set(handles.gauss_seidel_table, 'RowName', rows);
+[header] = build_iterative_output_table_header();
 
-used_gaussian_jordan = true;
+time = tic;
+[method_name_4, final_ans,iterations_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
+gauss_seidle_time = toc(time);
+ans_matrix = [ans_matrix; final_ans];
+set(handles.gauss_seidel_table, 'data', iterations_matrix);
+set(handles.gauss_seidel_table, 'ColumnName', header);
+
+%================Setting methods table=====================
+[header] = build_method_output_table_header();
+header = [header; {'Execution Time'}];
+
+res_table = handles.final_answer_table;
+set(res_table, 'ColumnName', header);
+set(res_table, 'RowName', {method_name_1, method_name_2, method_name_3, method_name_4});
+set(res_table, 'data', [ans_matrix, [gauss_elemination_time; lu_decomposition_time; gauss_jordan_time; gauss_seidle_time]]);
+
 used_gauss_seidel = true;
 
 
@@ -294,41 +280,31 @@ rows{sz + 1} = 'Execution Time';
 rows{sz + 2} = 'Iterations';
 
 function reset_tables(handles)
-set(handles.gaussian_jordan_table,'data',[]);
 set(handles.gauss_seidel_table,'data', []);
-set(handles.methods_output_table,'data',[]);
+set(handles.final_answer_table,'data',[]);
 set(handles.gauss_seidel_table,'RowName', 'numbered');
-set(handles.gaussian_jordan_table,'RowName', 'numbered');
-set(handles.methods_output_table,'RowName', 'numbered');
+set(handles.final_answer_table,'RowName', 'numbered');
 set(handles.gauss_seidel_table,'ColumnName', 'numbered');
-set(handles.gaussian_jordan_table,'ColumnName', 'numbered');
-set(handles.methods_output_table,'ColumnName', 'numbered');
+set(handles.final_answer_table,'ColumnName', 'numbered');
 
-function plot_gaussian_jordan_btn_Callback(~, ~, handles)
-%global tolerance method input_equations bes used_gaussian_jordan max_iterations epsillon initial_guesses;
-%if(used_gaussian_jordan == false)
-%    temp = method;
-%    method = 3;
-%    solve_btn_Callback('dummy', 'dummy',handles);
-%    method = temp;
-%end
-%axes(handles.plot_paper);
-% [ans_matrix] = <<============= call jordan =============
-%plot_iterations(ans_matrix);
-
-function plot_gauss_seidel_btn_Callback(~, ~, handles)
+function plot_btn_Callback(~, ~, handles)
 global method input_equations bes used_gauss_seidel max_iterations epsillon initial_guesses;
-if(used_gauss_seidel == false)
+if (used_gauss_seidel == false)
+    set(handles.methods, 'Value', 4);
     temp = method;
     method = 4;
     solve_btn_Callback('dummy', 'dummy',handles);
     method = temp;
 end
+[~, ~, ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
 axes(handles.plot_paper);
-[ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
 plot_iterations(ans_matrix);
 
 
 
 
-function read_file_btn_Callback(hObject, eventdata, handles)
+function read_file_btn_Callback(~, ~, handles)
+[~,a, b, initial_guesses] = read('input.txt');
+a = [a, b];
+set(handles.input_equations, 'data', a);
+set(handles.initial_guesses, 'data', initial_guesses);
