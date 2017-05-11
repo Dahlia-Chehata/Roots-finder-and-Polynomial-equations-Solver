@@ -191,8 +191,10 @@ elseif(method == 4)
     [~, final_ans, ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
     method_time = toc(start);
     set(handles.gauss_seidel_table, 'data', ans_matrix);
-    set(handles.final_answer_table,'data', final_ans);
     set(handles.gauss_seidel_table, 'Columnname', header);
+    [header] = build_method_output_table_header();
+    set(handles.final_answer_table,'data', final_ans);
+    set(handles.final_answer_table, 'Columnname', header);
     used_gauss_seidel = true;
 elseif(method == 5)
     total_time = tic;
@@ -304,7 +306,21 @@ plot_iterations(ans_matrix);
 
 
 function read_file_btn_Callback(~, ~, handles)
-[~,a, b, initial_guesses] = read('input.txt');
-a = [a, b];
-set(handles.input_equations, 'data', a);
+global number_of_equations bes input_equations initial_guesses;
+
+[number_of_equations ,input_equations, temp_bes, initial_guesses] = read('input.txt');
+set(handles.equations_number, 'string', number_of_equations);
+augmented_matrix = [input_equations, temp_bes];
+bes = transpose(temp_bes);
+set(handles.input_equations, 'data', augmented_matrix);
 set(handles.initial_guesses, 'data', initial_guesses);
+
+
+% --- Executes on button press in write_to_file_btn.
+function write_to_file_btn_Callback(~, ~, handles)
+%try
+    write_to_xls('output.xls',1, handles.final_answer_table);
+    write_to_xls('output.xls',2, handles.gauss_seidel_table);   
+%catch exception
+%    errordlg(getReport(exception));
+%end

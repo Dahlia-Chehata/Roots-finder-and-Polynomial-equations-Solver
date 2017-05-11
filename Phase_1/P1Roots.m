@@ -202,6 +202,8 @@ setConstPlotData(selectedIndex, f, a, b, g)
 [oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
 setMainData(mRoot,mIterations,mHeader,miterTable,mPrecision,mTime, handles);
 setOptData(oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime, handles);
+write_to_xls('output.xls',1, handles.mainTable);
+write_to_xls('output.xls',2, handles.optTable);
 plotGraph(handles);
 
 
@@ -226,7 +228,6 @@ try
             return;
     end
     setIterPlotData(iterTable(1:length(header)));
-    writeSolution(iterTable, header, 'optional method solution.xls');
 catch ME
     errorMessage = sprintf('Error Message:\n%s', ...
         ME.stack(1).name, ME.stack(1).line, ME.message);
@@ -245,7 +246,6 @@ function [root,iterations,header,iterTable,precision,time] = solveMainAlgorithm(
 warning('off','all')
 try
     [root,iterations,header,iterTable,precision,time] = NewtonRaphson(f,a1,maxIterations,eps);
-    writeSolution(iterTable, header, 'main method solution.xls');
 catch ME
     errorMessage = sprintf('Error Message:\n%s', ...
         ME.stack(1).name, ME.stack(1).line, ME.message);
