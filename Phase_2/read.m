@@ -1,4 +1,4 @@
-function [sz,A,B,initGuess] = read(x)
+function [sz,A,B,initGuess] = Read(x)
 A=[];
 B=[];
 symb=[];
@@ -11,10 +11,15 @@ end
 
 fid=fopen(x,'r');
 sz=str2double(fgetl(fid));
-initGuess=zeros(1,sz);
+initGuess=zeros(0,sz);
 
 for i=1:1:sz
     initGuess(i)=str2double(fgetl(fid));
+end
+if isnan(initGuess())
+   fclose(fid);
+   fid=fopen(x);
+   fgetl(fid);
 end
 while 1
     tline= fgetl(fid);
@@ -27,8 +32,13 @@ symb=symvar(str);
 variables =sym(symb);
 
 fid=fopen(x);
+if isnan(initGuess)
+ fgetl(fid);
+ initGuess=zeros(1,sz);
+else 
 for i=1:1:sz+1
    fgetl(fid);
+end
 end
 while 1
     tline= fgetl(fid);
