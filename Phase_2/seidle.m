@@ -23,8 +23,7 @@ for iter = 2 : iterations
             iterations_matrix(iter, 2 * var_x - 1) = sum / a(var_x, var_x);
             iterations_matrix(iter, 2 * var_x) = abs((iterations_matrix(iter, 2 * var_x - 1) - iterations_matrix(iter - 1, 2 * var_x - 1)) / iterations_matrix(iter, 2 * var_x - 1));
         else
-            exception = MException();
-            exception = addCause(exception, 'division by zero');
+            exception = MException('seidle:division_by_zero', 'Division by zero');
             throw(exception);
         end
         if iterations_matrix(iter, 2 * var_x) > eps

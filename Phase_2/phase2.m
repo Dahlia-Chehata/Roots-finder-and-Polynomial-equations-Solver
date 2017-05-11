@@ -161,9 +161,11 @@ else
 end
 
 function solve_btn_Callback(~, ~, handles)
-reset_tables(handles);
+reset_fields(handles);
 
 global tolerance method input_equations bes used_gauss_seidel max_iterations epsillon initial_guesses;
+method_time = 0;
+
 if (method == 1 || method == 2 || method == 3)
     [header] = build_method_output_table_header();
     error_flag = 0;
@@ -200,7 +202,7 @@ elseif(method == 4)
         set(handles.number_of_iterations, 'string', size(ans_matrix, 1));
         used_gauss_seidel = true;
     catch exception
-        errordlg(getReport(exception));
+        errordlg(exception.message);
     end
 elseif(method == 5)
     total_time = tic;
@@ -235,50 +237,59 @@ end
 
 function solve_all_methods(handles)
 global tolerance input_equations bes used_gauss_seidel max_iterations epsillon initial_guesses;
+methods_names = [];
+final_answers = [];
+consumed_time = [];
 
 %===================gaussElemination========
 time = tic;
-[method_name_1, temp_ans_matrix, error_flag] = gaussElemination(input_equations, bes, tolerance);
-gauss_elemination_time = toc(time);
-ans_matrix = [];
+[temp_method_name, ans_matrix, error_flag] = gaussElemination(input_equations, bes, tolerance);
 if (error_flag ~= -1)
-    ans_matrix = [ans_matrix; temp_ans_matrix];
+    consumed_time =  [consumed_time; toc(time)];    
+    if(~strcmp(temp_method_name, ''))
+        methods_names = strvcat(methods_names, temp_method_name);
+    end
+    final_answers = [final_answers; ans_matrix];
 end
 %===================luDecomposition========
 time = tic;
-[method_name_2, temp_ans_matrix, error_flag] = luDecomposition(input_equations, bes, tolerance);
-lu_decomposition_time = toc(time);
+[temp_method_name, ans_matrix, error_flag] = luDecomposition(input_equations, bes, tolerance);
 if (error_flag ~= -1)
-    ans_matrix = [ans_matrix; temp_ans_matrix];
+    consumed_time =  [consumed_time; toc(time)];
+    if(~strcmp(temp_method_name, ''))
+        methods_names = strvcat(methods_names, temp_method_name);
+    end
+    final_answers = [final_answers; ans_matrix];
 end
 %====================gaussianJordan=======================
 time = tic;
-[method_name_3, temp_ans_matrix] = gaussJordan(input_equations, bes);
-ans_matrix = [ans_matrix; temp_ans_matrix];
-gauss_jordan_time = toc(time);
+[temp_method_name, ans_matrix] = gaussJordan(input_equations, bes);
+consumed_time =  [consumed_time; toc(time)];
+final_answers = [final_answers; ans_matrix];
+methods_names = strvcat(methods_names, temp_method_name);
 
 %====================seidle==============================
 try
     [header] = build_iterative_output_table_header();
     time = tic;
-    [method_name_4, final_ans,iterations_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
-    gauss_seidle_time = toc(time);
-    ans_matrix = [ans_matrix; final_ans];
+    [temp_method_name, ans_matrix,iterations_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
+    methods_names = strvcat(methods_names, temp_method_name);
+    consumed_time =  [consumed_time; toc(time)];
+    final_answers = [final_answers; ans_matrix];
     set(handles.gauss_seidel_table, 'data', iterations_matrix);
     set(handles.gauss_seidel_table, 'ColumnName', header);
     set(handles.number_of_iterations, 'string', size(iterations_matrix, 1));
 catch exception
-    errordlg(getReport(exception));
+    errordlg(exception.message);
 end
 
-%================Setting methods table=====================
+%================Setting final answer table=====================
 [header] = build_method_output_table_header();
 header = [header; {'Execution Time'}];
 
-res_table = handles.final_answer_table;
-set(res_table, 'ColumnName', header);
-set(res_table, 'RowName', {method_name_1, method_name_2, method_name_3, method_name_4});
-set(res_table, 'data', [ans_matrix, [gauss_elemination_time; lu_decomposition_time; gauss_jordan_time; gauss_seidle_time]]);
+set(handles.final_answer_table, 'ColumnName', header);
+set(handles.final_answer_table, 'RowName', methods_names);
+set(handles.final_answer_table, 'data', [final_answers, consumed_time]);
 
 used_gauss_seidel = true;
 
@@ -291,7 +302,10 @@ end
 rows{sz + 1} = 'Execution Time';
 rows{sz + 2} = 'Iterations';
 
-function reset_tables(handles)
+function reset_fields(handles)
+axes(handles.plot_paper);
+cla;
+set(handles.number_of_iterations, 'string', 0);
 set(handles.gauss_seidel_table,'data', []);
 set(handles.final_answer_table,'data',[]);
 set(handles.gauss_seidel_table,'RowName', 'numbered');
@@ -308,8 +322,9 @@ if (used_gauss_seidel == false)
     solve_btn_Callback('dummy', 'dummy',handles);
     method = temp;
 end
+ans_matrix = [];
 try
-    [~, ~, ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
+    ans_matrix = get(handles.gauss_seidel_table, 'data');
 catch exception
     errordlg(exception.message);
 end
@@ -328,6 +343,9 @@ augmented_matrix = [input_equations, temp_bes];
 bes = transpose(temp_bes);
 set(handles.input_equations, 'data', augmented_matrix);
 set(handles.initial_guesses, 'data', initial_guesses);
+set(handles.input_equations,'ColumnEditable',true(1,number_of_equations + 1));
+set(handles.initial_guesses,'ColumnEditable',true(1,number_of_equations));
+
 
 
 % --- Executes on button press in write_to_file_btn.
@@ -338,125 +356,3 @@ try
 catch exception
     errordlg(getReport(exception));
 end
-
-
-
-function edit15_Callback(hObject, eventdata, handles)
-% hObject    handle to edit15 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit15 as text
-%        str2double(get(hObject,'String')) returns contents of edit15 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit15_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit15 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit16_Callback(hObject, eventdata, handles)
-% hObject    handle to edit16 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit16 as text
-%        str2double(get(hObject,'String')) returns contents of edit16 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit16_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit16 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on selection change in popupmenu5.
-function popupmenu5_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu5 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu5
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenu5_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit17_Callback(hObject, eventdata, handles)
-% hObject    handle to edit17 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit17 as text
-%        str2double(get(hObject,'String')) returns contents of edit17 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit17_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit17 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit18_Callback(hObject, eventdata, handles)
-% hObject    handle to edit18 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit18 as text
-%        str2double(get(hObject,'String')) returns contents of edit18 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit18_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit18 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbutton10.
-function pushbutton10_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton10 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
