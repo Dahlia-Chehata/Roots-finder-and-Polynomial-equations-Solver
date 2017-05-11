@@ -169,6 +169,8 @@ method_time = 0;
 if (method == 1 || method == 2 || method == 3)
     [header] = build_method_output_table_header();
     error_flag = 0;
+    ans_matrix = [];
+    method_time = 0;
     if (method == 1)
         start = tic;
         [~, ans_matrix, error_flag] = gaussElemination(input_equations, bes, tolerance);
@@ -179,7 +181,12 @@ if (method == 1 || method == 2 || method == 3)
         method_time = toc(start);
     elseif(method == 3)
         start = tic;
-        [~, ans_matrix] = gaussJordan(input_equations, bes);
+        try
+            [~, ans_matrix] = gaussJordan(input_equations, bes, tolerance);
+        catch exception
+            errordlg(exception.message);
+            error_flag = -1;
+        end
         method_time = toc(start);
     end
     if error_flag ~= -1
@@ -245,7 +252,7 @@ consumed_time = [];
 time = tic;
 [temp_method_name, ans_matrix, error_flag] = gaussElemination(input_equations, bes, tolerance);
 if (error_flag ~= -1)
-    consumed_time =  [consumed_time; toc(time)];    
+    consumed_time =  [consumed_time; toc(time)];
     if(~strcmp(temp_method_name, ''))
         methods_names = strvcat(methods_names, temp_method_name);
     end
@@ -263,11 +270,19 @@ if (error_flag ~= -1)
 end
 %====================gaussianJordan=======================
 time = tic;
-[temp_method_name, ans_matrix] = gaussJordan(input_equations, bes);
-consumed_time =  [consumed_time; toc(time)];
-final_answers = [final_answers; ans_matrix];
-methods_names = strvcat(methods_names, temp_method_name);
-
+try
+[temp_method_name, ans_matrix] = gaussJordan(input_equations, bes, tolerance);
+catch exception
+    errordlg(exception.message);
+    error_flag = -1;
+end
+if (error_flag ~= -1)
+    consumed_time =  [consumed_time; toc(time)];
+    if(~strcmp(temp_method_name, ''))
+        methods_names = strvcat(methods_names, temp_method_name);
+    end
+    final_answers = [final_answers; ans_matrix];
+end
 %====================seidle==============================
 try
     [header] = build_iterative_output_table_header();
