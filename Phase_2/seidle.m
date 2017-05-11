@@ -1,5 +1,12 @@
 function [method_name ,final_ans,iterations_matrix] = seidle(a, b, x, iterations, eps)
 method_name = 'Gauss-Seidel';
+[ a, b, flag ] = reorder( a, b );
+display(flag);
+if (flag == 1)
+    invalid = MException('seidle : Matrix is not Diagonally Dominant', 'Matrix is not Diagonally Dominant');
+    throw(invalid);
+end
+display('hamada');
 sz = size(a, 1);
 iterations_matrix = zeros(0, sz*2);
 for i = 1 : sz
