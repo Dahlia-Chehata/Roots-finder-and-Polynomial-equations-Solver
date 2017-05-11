@@ -351,8 +351,9 @@ plot_iterations(ans_matrix);
 
 function read_file_btn_Callback(~, ~, handles)
 global number_of_equations bes input_equations initial_guesses;
-
-[number_of_equations ,input_equations, temp_bes, initial_guesses] = read('input.txt');
+[file_name, path_name] =  uigetfile('*.txt', 'inputfile');
+path = strcat(path_name , file_name);
+[number_of_equations ,input_equations, temp_bes, initial_guesses] = read(path);
 set(handles.equations_number, 'string', number_of_equations);
 augmented_matrix = [input_equations, temp_bes];
 bes = transpose(temp_bes);
@@ -366,8 +367,11 @@ set(handles.initial_guesses,'ColumnEditable',true(1,number_of_equations));
 % --- Executes on button press in write_to_file_btn.
 function write_to_file_btn_Callback(~, ~, handles)
 try
-    write_to_xls('output.xls',1, handles.final_answer_table);
-    write_to_xls('output.xls',2, handles.gauss_seidel_table);
+    file_name = inputdlg('Enter space-separated numbers:',...
+             'Sample', [1 89]);
+    path = strcat(file_name , '.xls');
+    write_to_xls( path, 1, handles.final_answer_table);
+    write_to_xls( path, 2, handles.gauss_seidel_table);
 catch exception
     errordlg(getReport(exception));
 end
