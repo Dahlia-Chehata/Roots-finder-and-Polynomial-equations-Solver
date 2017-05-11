@@ -1,4 +1,5 @@
 function [sz,A,B,initGuess] = Read(x)
+warning('off','all');
 A=[];
 B=[];
 symb=[];

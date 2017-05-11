@@ -185,17 +185,23 @@ if (method == 1 || method == 2 || method == 3)
         set(handles.final_answer_table, 'Columnname', header);
     end
     used_gauss_seidel = false;
+    set(handles.number_of_iterations, 'string', 0);
 elseif(method == 4)
-    [header] = build_iterative_output_table_header();
-    start = tic;
-    [~, final_ans, ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
-    method_time = toc(start);
-    set(handles.gauss_seidel_table, 'data', ans_matrix);
-    set(handles.gauss_seidel_table, 'Columnname', header);
-    [header] = build_method_output_table_header();
-    set(handles.final_answer_table,'data', final_ans);
-    set(handles.final_answer_table, 'Columnname', header);
-    used_gauss_seidel = true;
+    try
+        [header] = build_iterative_output_table_header();
+        start = tic;
+        [~, final_ans, ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
+        method_time = toc(start);
+        set(handles.gauss_seidel_table, 'data', ans_matrix);
+        set(handles.gauss_seidel_table, 'Columnname', header);
+        [header] = build_method_output_table_header();
+        set(handles.final_answer_table,'data', final_ans);
+        set(handles.final_answer_table, 'Columnname', header);
+        set(handles.number_of_iterations, 'string', size(ans_matrix, 1));
+        used_gauss_seidel = true;
+    catch exception
+        errordlg(getReport(exception));
+    end
 elseif(method == 5)
     total_time = tic;
     solve_all_methods(handles);
@@ -252,14 +258,18 @@ ans_matrix = [ans_matrix; temp_ans_matrix];
 gauss_jordan_time = toc(time);
 
 %====================seidle==============================
-[header] = build_iterative_output_table_header();
-
-time = tic;
-[method_name_4, final_ans,iterations_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
-gauss_seidle_time = toc(time);
-ans_matrix = [ans_matrix; final_ans];
-set(handles.gauss_seidel_table, 'data', iterations_matrix);
-set(handles.gauss_seidel_table, 'ColumnName', header);
+try
+    [header] = build_iterative_output_table_header();
+    time = tic;
+    [method_name_4, final_ans,iterations_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
+    gauss_seidle_time = toc(time);
+    ans_matrix = [ans_matrix; final_ans];
+    set(handles.gauss_seidel_table, 'data', iterations_matrix);
+    set(handles.gauss_seidel_table, 'ColumnName', header);
+    set(handles.number_of_iterations, 'string', size(iterations_matrix, 1));
+catch exception
+    errordlg(getReport(exception));
+end
 
 %================Setting methods table=====================
 [header] = build_method_output_table_header();
@@ -298,7 +308,11 @@ if (used_gauss_seidel == false)
     solve_btn_Callback('dummy', 'dummy',handles);
     method = temp;
 end
-[~, ~, ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
+try
+    [~, ~, ans_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
+catch exception
+    errordlg(exception.message);
+end
 axes(handles.plot_paper);
 plot_iterations(ans_matrix);
 
@@ -318,9 +332,9 @@ set(handles.initial_guesses, 'data', initial_guesses);
 
 % --- Executes on button press in write_to_file_btn.
 function write_to_file_btn_Callback(~, ~, handles)
-%try
+try
     write_to_xls('output.xls',1, handles.final_answer_table);
-    write_to_xls('output.xls',2, handles.gauss_seidel_table);   
-%catch exception
-%    errordlg(getReport(exception));
-%end
+    write_to_xls('output.xls',2, handles.gauss_seidel_table);
+catch exception
+    errordlg(getReport(exception));
+end

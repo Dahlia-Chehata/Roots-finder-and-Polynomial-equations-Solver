@@ -23,7 +23,9 @@ for iter = 2 : iterations
             iterations_matrix(iter, 2 * var_x - 1) = sum / a(var_x, var_x);
             iterations_matrix(iter, 2 * var_x) = abs((iterations_matrix(iter, 2 * var_x - 1) - iterations_matrix(iter - 1, 2 * var_x - 1)) / iterations_matrix(iter, 2 * var_x - 1));
         else
-            errordlg('Division by zero');
+            exception = MException();
+            exception = addCause(exception, 'division by zero');
+            throw(exception);
         end
         if iterations_matrix(iter, 2 * var_x) > eps
             stop = 0;
