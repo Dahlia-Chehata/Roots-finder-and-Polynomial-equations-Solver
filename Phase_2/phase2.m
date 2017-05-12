@@ -1,11 +1,11 @@
 function varargout = phase2(varargin)
 gui_Singleton = 1;
 gui_State = struct('gui_Name', mfilename, ...
-  'gui_Singleton', gui_Singleton, ...
-  'gui_OpeningFcn', @phase2_OpeningFcn, ...
-  'gui_OutputFcn', @phase2_OutputFcn, ...
-  'gui_LayoutFcn', [], ...
-  'gui_Callback', []);
+    'gui_Singleton', gui_Singleton, ...
+    'gui_OpeningFcn', @phase2_OpeningFcn, ...
+    'gui_OutputFcn', @phase2_OutputFcn, ...
+    'gui_LayoutFcn', [], ...
+    'gui_Callback', []);
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -244,129 +244,134 @@ end
 function solve_all_methods(handles)
 global tolerance input_equations bes used_gauss_seidel max_iterations epsillon initial_guesses;
 methods_names = [];
-    final_answers = [];
-    consumed_time = [];
- 
-    %===================gaussElemination========
+final_answers = [];
+consumed_time = [];
+
+%===================gaussElemination========
+time = tic;
+[temp_method_name, ans_matrix, error_flag] = gaussElemination(input_equations, bes, tolerance);
+if (error_flag ~= - 1)
+    consumed_time = [consumed_time; toc(time)];
+    if (~ strcmp(temp_method_name, ''))
+        methods_names = strvcat(methods_names, temp_method_name);
+    end
+    final_answers = [final_answers; ans_matrix];
+end
+%===================luDecomposition========
+time = tic;
+[temp_method_name, ans_matrix, error_flag] = luDecomposition(input_equations, bes, tolerance);
+if (error_flag ~= - 1)
+    consumed_time = [consumed_time; toc(time)];
+    if (~ strcmp(temp_method_name, ''))
+        methods_names = strvcat(methods_names, temp_method_name);
+    end
+    final_answers = [final_answers; ans_matrix];
+end
+%====================gaussianJordan=======================
+time = tic;
+try
+    [temp_method_name, ans_matrix] = gaussJordan(input_equations, bes, tolerance);
+catch exception
+    errordlg(exception.message);
+    error_flag = - 1;
+end
+if (error_flag ~= - 1)
+    consumed_time = [consumed_time; toc(time)];
+    if (~ strcmp(temp_method_name, ''))
+        methods_names = strvcat(methods_names, temp_method_name);
+    end
+    final_answers = [final_answers; transpose(ans_matrix)];
+end
+%====================seidle==============================
+try
+    [header] = build_iterative_output_table_header();
     time = tic;
-    [temp_method_name, ans_matrix, error_flag] = gaussElemination(input_equations, bes, tolerance);
-    if (error_flag ~= - 1)
-        consumed_time = [consumed_time; toc(time)];
-        if (~ strcmp(temp_method_name, ''))
-            methods_names = strvcat(methods_names, temp_method_name);
-            end
-            final_answers = [final_answers; ans_matrix];
-        end
-        %===================luDecomposition========
-        time = tic;
-        [temp_method_name, ans_matrix, error_flag] = luDecomposition(input_equations, bes, tolerance);
-        if (error_flag ~= - 1)
-            consumed_time = [consumed_time; toc(time)];
-            if (~ strcmp(temp_method_name, ''))
-                methods_names = strvcat(methods_names, temp_method_name);
-                end
-                final_answers = [final_answers; ans_matrix];
-            end
-            %====================gaussianJordan=======================
-            time = tic;
-            try
-                [temp_method_name, ans_matrix] = gaussJordan(input_equations, bes, tolerance);
-            catch exception
-                errordlg(exception.message);
-                error_flag = - 1;
-            end
-            if (error_flag ~= - 1)
-                consumed_time = [consumed_time; toc(time)];
-                if (~ strcmp(temp_method_name, ''))
-                    methods_names = strvcat(methods_names, temp_method_name);
-                    end
-                    final_answers = [final_answers; transpose(ans_matrix)];
-                end
-                %====================seidle==============================
-                try
-                    [header] = build_iterative_output_table_header();
-                    time = tic;
-                    [temp_method_name, ans_matrix, iterations_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
-                    methods_names = strvcat(methods_names, temp_method_name);
-                        consumed_time = [consumed_time; toc(time)];
-                        final_answers = [final_answers; ans_matrix];
-                        set(handles.gauss_seidel_table, 'data', iterations_matrix);
-                        set(handles.gauss_seidel_table, 'ColumnName', header);
-                        set(handles.number_of_iterations, 'string', size(iterations_matrix, 1));
-                    catch exception
-                        errordlg(exception.message);
-                    end
-                 
-                    %================Setting final answer table=====================
-                    [header] = build_method_output_table_header();
-                    header = [header; {'Execution Time'}];
-                 
-                    set(handles.final_answer_table, 'ColumnName', header);
-                    set(handles.final_answer_table, 'RowName', methods_names);
-                    set(handles.final_answer_table, 'data', [final_answers, consumed_time]);
-                 
-                    used_gauss_seidel = true;
-                 
-                    function [rows] = build_iterative_table_rows_names(sz)
-                    rows = cell(sz + 2, 1);
-                    for i = 1 : sz
-                        rows{i} = sprintf('%d', i);
-                    end
-                    rows{sz + 1} = 'Execution Time';
-                    rows{sz + 2} = 'Iterations';
-                 
-                    function reset_fields(handles)
-                    axes(handles.plot_paper);
-                    cla;
-                    set(handles.number_of_iterations, 'string', 0);
-                    set(handles.gauss_seidel_table, 'data', []);
-                    set(handles.final_answer_table, 'data', []);
-                    set(handles.gauss_seidel_table, 'RowName', 'numbered');
-                    set(handles.final_answer_table, 'RowName', 'numbered');
-                    set(handles.gauss_seidel_table, 'ColumnName', 'numbered');
-                    set(handles.final_answer_table, 'ColumnName', 'numbered');
-                 
-                    function plot_btn_Callback(~, ~, handles)
-                    global method input_equations bes used_gauss_seidel max_iterations epsillon initial_guesses;
-                    if (used_gauss_seidel == false)
-                        set(handles.methods, 'Value', 4);
-                        temp = method;
-                        method = 4;
-                        solve_btn_Callback('dummy', 'dummy', handles);
-                        method = temp;
-                    end
-                    ans_matrix = [];
-                    try
-                        ans_matrix = get(handles.gauss_seidel_table, 'data');
-                    catch exception
-                        errordlg(exception.message);
-                    end
-                    axes(handles.plot_paper);
-                    plot_iterations(ans_matrix);
-                 
-                    function read_file_btn_Callback(~, ~, handles)
-                    global number_of_equations bes input_equations initial_guesses;
-                    [file_name, path_name] = uigetfile('*.txt', 'inputfile');
-                    path = strcat(path_name, file_name);
-                    [number_of_equations, input_equations, temp_bes, initial_guesses] = read(path);
-                    set(handles.equations_number, 'string', number_of_equations);
-                    augmented_matrix = [input_equations, temp_bes];
-                    bes = transpose(temp_bes);
-                    set(handles.input_equations, 'data', augmented_matrix);
-                    set(handles.initial_guesses, 'data', initial_guesses);
-                    set(handles.input_equations, 'ColumnEditable', true(1, number_of_equations + 1));
-                    set(handles.initial_guesses, 'ColumnEditable', true(1, number_of_equations));
-                 
-                    % --- Executes on button press in write_to_file_btn.
-                    function write_to_file_btn_Callback(~, ~, handles)
-                    try
-                        file_name = inputdlg('Enter space-separated numbers:', ...
-                          'Sample', [1 89]);
-                        path = strcat(file_name, '.xls');
-                        write_to_xls(path, 1, handles.final_answer_table);
-                        write_to_xls(path, 2, handles.gauss_seidel_table);
-                    catch exception
-                        errordlg(getReport(exception));
-                    end
-                 
-                 
+    [temp_method_name, ans_matrix, iterations_matrix] = seidle(input_equations, bes, initial_guesses, max_iterations, epsillon);
+    methods_names = strvcat(methods_names, temp_method_name);
+    consumed_time = [consumed_time; toc(time)];
+    final_answers = [final_answers; ans_matrix];
+    set(handles.gauss_seidel_table, 'data', iterations_matrix);
+    set(handles.gauss_seidel_table, 'ColumnName', header);
+    set(handles.number_of_iterations, 'string', size(iterations_matrix, 1));
+catch exception
+    errordlg(exception.message);
+end
+
+%================Setting final answer table=====================
+[header] = build_method_output_table_header();
+header = [header; {'Execution Time'}];
+
+set(handles.final_answer_table, 'ColumnName', header);
+set(handles.final_answer_table, 'RowName', methods_names);
+set(handles.final_answer_table, 'data', [final_answers, consumed_time]);
+
+used_gauss_seidel = true;
+
+function [rows] = build_iterative_table_rows_names(sz)
+rows = cell(sz + 2, 1);
+for i = 1 : sz
+    rows{i} = sprintf('%d', i);
+end
+rows{sz + 1} = 'Execution Time';
+rows{sz + 2} = 'Iterations';
+
+function reset_fields(handles)
+axes(handles.plot_paper);
+cla;
+set(handles.number_of_iterations, 'string', 0);
+set(handles.gauss_seidel_table, 'data', []);
+set(handles.final_answer_table, 'data', []);
+set(handles.gauss_seidel_table, 'RowName', 'numbered');
+set(handles.final_answer_table, 'RowName', 'numbered');
+set(handles.gauss_seidel_table, 'ColumnName', 'numbered');
+set(handles.final_answer_table, 'ColumnName', 'numbered');
+
+function plot_btn_Callback(~, ~, handles)
+global method input_equations bes used_gauss_seidel max_iterations epsillon initial_guesses;
+if (used_gauss_seidel == false)
+    set(handles.methods, 'Value', 4);
+    temp = method;
+    method = 4;
+    solve_btn_Callback('dummy', 'dummy', handles);
+    method = temp;
+end
+ans_matrix = [];
+try
+    ans_matrix = get(handles.gauss_seidel_table, 'data');
+catch exception
+    errordlg(exception.message);
+end
+axes(handles.plot_paper);
+plot_iterations(ans_matrix);
+
+function read_file_btn_Callback(~, ~, handles)
+global number_of_equations bes input_equations initial_guesses;
+[file_name, path_name] = uigetfile('*.txt', 'inputfile');
+path = strcat(path_name, file_name);
+[number_of_equations, input_equations, temp_bes, initial_guesses] = read(path);
+set(handles.equations_number, 'string', number_of_equations);
+augmented_matrix = [input_equations, temp_bes];
+bes = transpose(temp_bes);
+set(handles.input_equations, 'data', augmented_matrix);
+set(handles.initial_guesses, 'data', initial_guesses);
+set(handles.input_equations, 'ColumnEditable', true(1, number_of_equations + 1));
+set(handles.initial_guesses, 'ColumnEditable', true(1, number_of_equations));
+
+% --- Executes on button press in write_to_file_btn.
+function write_to_file_btn_Callback(~, ~, handles)
+%try
+    file_name = inputdlg('Enter space-separated numbers:', ...
+        'Sample', [1 89]);
+    if(isempty(file_name))
+        return;
+    end
+    path = strcat(file_name, '.xls');
+    if exist(path{1}, 'file');
+        delete(path{1});
+    end
+    write_to_xls(path, 1, handles.final_answer_table);
+    write_to_xls(path, 2, handles.gauss_seidel_table);
+%catch exception
+    %errordlg(getReport(exception));
+%end
+
