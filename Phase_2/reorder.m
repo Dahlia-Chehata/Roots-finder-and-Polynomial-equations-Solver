@@ -2,7 +2,7 @@ function [ordered, orderedB, err] = reOrder(unOrdered, b)
     n = size(unOrdered, 1);
     orderdB = [];
     taken = [];
-    orderd = zeros(0, n*2);
+    orderd = zeros(0, n * 2);
     err = 0;
     for i = 1:n
         taken(i) = 0;
@@ -23,7 +23,7 @@ function [ordered, orderedB, err] = reOrder(unOrdered, b)
         end
         taken(maxIndex) = 1;
         for j = 1:n
-            ordered(maxIndex, j) = unOrdered(i, j); 
+            ordered(maxIndex, j) = unOrdered(i, j);
         end
         orderedB(maxIndex) = b(i);
     end

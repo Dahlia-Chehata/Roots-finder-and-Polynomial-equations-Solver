@@ -1,5 +1,5 @@
 function [] = plot_iterations(matrix)
-cla;
+    cla;
     [rows, cols] = size(matrix);
     iteratins = zeros(rows, 1);
     for i = 1 : rows

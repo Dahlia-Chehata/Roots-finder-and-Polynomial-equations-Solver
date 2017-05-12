@@ -7,7 +7,7 @@ function [a, ind, err] = decompose(a, tol)
         ind(i) = i;
         scale(i) = abs(a(i, 1));
         for j = 2 : n
-            if(abs(a(i, j)) > scale(i))
+            if (abs(a(i, j)) > scale(i))
                 scale(i) = abs(a(i, j));
             end
         end
@@ -15,7 +15,7 @@ function [a, ind, err] = decompose(a, tol)
     for k = 1 : n - 1
         ind = luPivot(a, scale, ind, n, k);
         if abs(a(ind(k), k) / scale(ind(k))) < tol
-            err = -1;
+            err = - 1;
             return;
         end
         for i = k + 1 : n
@@ -27,6 +27,6 @@ function [a, ind, err] = decompose(a, tol)
         end
     end
     if abs(a(ind(n), n)) / scale(ind(n)) < tol
-        err = -1;
+        err = - 1;
     end
 end

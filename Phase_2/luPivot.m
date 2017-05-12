@@ -3,7 +3,7 @@ function [ind] = luPivot(a, scale, ind, n, k)
     largest = abs(a(ind(k), k) / scale(ind(k)));
     for i = k + 1 : n
         temp = abs(a(ind(i), k) / scale(ind(i)));
-        if(temp > largest)
+        if (temp > largest)
             piv = i;
             largest = temp;
         end
