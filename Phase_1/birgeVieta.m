@@ -1,4 +1,4 @@
-function [root,iterations,header,IterTable,precision,time] = birgeVieta(polynomial,initVal,eps,MaxIterations)
+function [root,iterations,header,IterTable,precision,time] = birgeVieta(polynomial,initVal,MaxIterations,eps)
 tic;
 x=zeros(MaxIterations,1);
 x(1)=initVal;

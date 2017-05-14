@@ -1,25 +1,25 @@
 function [root,iterations,header,IterTable,precision,time] = Secant(f,a, b,MaxIterations,eps)
 tic;
-x = zeros(1,MaxIterations);
-x(1)=a;
-x(2) = b;
+iter_value = zeros(1,MaxIterations);
+iter_value(1)=a;
+iter_value(2) = b;
 IterTable=zeros(0,6);
 header = {'x(i-1)' 'x(i)' 'x(i + 1)' 'F(x(i - 1))' 'F(x(i))' 'abs(ea)'};
 for i=2:1:MaxIterations + 1
-    fNew = eval(subs(f,x(i)));
-    fOld = eval(subs(f,x(i - 1)));
-    if(abs(fOld - fNew) <= eps)
+    f_new = eval(subs(f,iter_value(i)));
+    f_old = eval(subs(f,iter_value(i - 1)));
+    if(abs(f_old - f_new) <= eps)
         break;
         error('the denominator is equal to zero');
     else
-        x(i+1) = x(i) - ((fNew * (x(i - 1) - x(i)))/(fOld - fNew));
-        ea= (x(i+1)-x(i))/(x(i+1))*100;
-        row=[x(i - 1),x(i),x(i + 1),fOld, fNew,abs(ea)];
+        iter_value(i+1) = iter_value(i) - ((f_new * (iter_value(i - 1) - iter_value(i)))/(f_old - f_new));
+        ea= (iter_value(i+1)-iter_value(i))/(iter_value(i+1))*100;
+        row=[iter_value(i - 1),iter_value(i),iter_value(i + 1),f_old, f_new,abs(ea)];
         IterTable=[IterTable;row];
     end
-    check=abs(double(eval(subs(f,x(i+1)))));
+    check=abs(double(eval(subs(f,iter_value(i+1)))));
     if (check<=eps || abs(ea)<=eps)
-        root=x(i+1);
+        root=iter_value(i+1);
         time = toc;
         break;
     end

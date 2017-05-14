@@ -72,26 +72,20 @@ end
 
 % --- Executes during object creation, after setting all properties.
 function percBox_CreateFcn(hObject, ~, ~)
-% hObject    handle to percBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
 % --- Executes on button press in setDefaultValueBtn.
-function setDefaultValueBtn_Callback(hObject, eventdata, handles)
+function setDefaultValueBtn_Callback(~, ~, handles)
 global changedData;
 changedData = true;
 set(handles.itLabel, 'string', 50);
 set(handles.percLabel, 'string', 0.00001);
 
 % --- Executes on button press in setValueBtn.
-function setValueBtn_Callback(hObject, eventdata, handles)
+function setValueBtn_Callback(~, ~, handles)
 global changedData;
 changedData = true;
 set(handles.itLabel, 'string', get(handles.mxItBox, 'string'));
@@ -99,34 +93,15 @@ set(handles.percLabel, 'string', get(handles.percBox, 'string'));
 
 
 % --- Executes on selection change in listbox1.
-function listbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to listbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+function listbox1_Callback(~, ~, ~)
 
-% Hints: contents = get(hObject,'String') returns listbox1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from listbox1
-
-
-% --- Executes during object creation, after setting all properties.
-function listbox1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to listbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: listbox controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
+function listbox1_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
-% --- Executes on button press in stepButton.
-function stepButton_Callback(hObject, eventdata, handles)
+function stepButton_Callback(~, ~, handles)
 global changedData;
-global mRoot mIterations mHeader miterTable mPrecision mTime;
-global oRoot oIterations oHeader oiterTable oPrecision oTime
-global ind1 ind2;
 if(changedData == true)
     getGlobalData(handles);
 end
@@ -137,20 +112,20 @@ plotGraph(handles);
 function getGlobalData(handles)
 global ind1 ind2;
 global changedData;
-global mRoot mIterations mHeader miterTable mPrecision mTime;
+global mRoot mIterations mHeader miterTable mPrecision mTime mError;
 global oRoot oIterations oHeader oiterTable oPrecision oTime;
 global selectedIndex;
 selectedIndex = get(handles.popupmenu1, 'Value');
 f = get(handles.funcBox, 'string');
 g = get(handles.extraFuncBox, 'string');
-a = str2num(get(handles.startBox, 'string'));
-a1 = str2num(get(handles.mainStartBox, 'string'));
-b = str2num(get(handles.endBox, 'string'));
-maxIterations = str2num(get(handles.itLabel, 'string'));
-eps = str2num(get(handles.percLabel, 'string'));
+a = str2double(get(handles.startBox, 'string'));
+[a1,b1] = getInitialMain(handles,f);
+b = str2double(get(handles.endBox, 'string'));
+maxIterations = str2double(get(handles.itLabel, 'string'));
+eps = str2double(get(handles.percLabel, 'string'));
 setConstPlotData(selectedIndex, f, a, b, g);
-[mRoot,mIterations,mHeader,miterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
-[oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
+[mRoot,mIterations,mHeader,miterTable,mPrecision,mTime,mError] = solveMainAlgorithm(f, a1, b1,maxIterations, eps);
+[oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps);
 changedData = false;
 ind1 = 0;
 ind2 = 0;
@@ -158,23 +133,24 @@ ind2 = 0;
 function setGlobalData(handles)
 global ind1 ind2;
 global changedData;
-global mRoot mIterations mHeader miterTable mPrecision mTime;
+global mRoot mIterations mHeader miterTable mPrecision mTime mError;
 global oRoot oIterations oHeader oiterTable oPrecision oTime;
-global selectedIndex;
 if(changedData == false)
     ind1 = ind1 + 1;
     ind2 = ind2 + 1;
     h1 = length(mHeader);
     h2 = length(oHeader);
-    mMaxSize = min(ind1, size(miterTable,1));
+    if mError == 0
+        mMaxSize = min(ind1, size(miterTable,1));
+        setMainData(mRoot,mIterations,mHeader,miterTable(1:mMaxSize, 1 : h1),mPrecision,mTime, handles);
+    end
     oMaxSize = min(ind2, size(oiterTable,1));
     setIterPlotData(oiterTable(oMaxSize:oMaxSize, 1:h2));
-    setMainData(mRoot,mIterations,mHeader,miterTable(1:mMaxSize, 1 : h1),mPrecision,mTime, handles);
     setOptData(oRoot,oIterations,oHeader,oiterTable(1:oMaxSize, 1:h2),oPrecision,oTime, handles);
 end
 
 function setConstPlotData(selectedIndex, f, a, b, g)
-global pIndex pF pA pB pG pMaxIterations pEps;
+global pIndex pF pA pB pG;
 pIndex = selectedIndex;
 pF = f;
 pA = a;
@@ -186,28 +162,67 @@ global pIter;
 pIter = iterTable;
 
 % --- Executes on button press in solveButton.
-function solveButton_Callback(hObject, eventdata, handles)
+function solveButton_Callback(~, ~, handles)
 global changedData selectedIndex;
 changedData = true;
 selectedIndex = get(handles.popupmenu1, 'Value');
 f = get(handles.funcBox, 'string');
 g = get(handles.extraFuncBox, 'string');
 a = str2double(get(handles.startBox, 'string'));
-a1 = str2double(get(handles.mainStartBox, 'string'));
+[a1,b1,error] = getInitialMain(handles, f);
 b = str2double(get(handles.endBox, 'string'));
 maxIterations = str2double(get(handles.itLabel, 'string'));
 eps = str2double(get(handles.percLabel, 'string'));
 setConstPlotData(selectedIndex, f, a, b, g)
-[mRoot,mIterations,mHeader,miterTable,mPrecision,mTime] = solveMainAlgorithm(f, a1, maxIterations, eps, handles);
-[oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles);
-setMainData(mRoot,mIterations,mHeader,miterTable,mPrecision,mTime, handles);
+if error ~= true
+    [mRoot,mIterations,mHeader,miterTable,mPrecision,mTime, mError] = solveMainAlgorithm(f, a1, b1, maxIterations, eps);
+    if mError == 0
+        setMainData(mRoot,mIterations,mHeader,miterTable,mPrecision,mTime,handles);
+        write_to_xls('output.xls',1, handles.mainTable);
+    end
+end
+[oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps);
 setOptData(oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime, handles);
-write_to_xls('output.xls',1, handles.mainTable);
 write_to_xls('output.xls',2, handles.optTable);
 plotGraph(handles);
 
+function [a1,b1,error] = getInitialMain(handles, funct)
+try
+    a1 = 0;
+    b1 = 0;
+    searchStart = str2double(get(handles.searchStart, 'string'));
+    searchDelta = str2double(get(handles.searchDelta, 'string'));
+    maxTime = str2double(get(handles.searchTime, 'string'));
+    timeSum = 0;
+    i = 0;
+    error = false;
+    while timeSum < maxTime
+        tic;
+        firstVal = eval(subs(funct,searchStart + i * searchDelta));
+        secondVal = eval(subs(funct,searchStart + (i+1) * searchDelta));
+        if firstVal * secondVal <= 0
+            a1 = searchStart + i * searchDelta;
+            b1 = searchStart + (i + 1) * searchDelta;
+            break;
+        end
+        timeSum = timeSum + toc;
+        i = i + 1;
+    end
+    if timeSum >= maxTime
+        error = true;
+        errorMessage = sprintf('Could not find a good guesses method will stop');
+        fprintf(1, '%s\n', errorMessage);
+        uiwait(errordlg(errorMessage));
+    end
+catch ME
+    ME.message()
+    errorMessage = sprintf('Error Message:Please make sure that search data are valid.');
+    fprintf(1, '%s\n', errorMessage);
+    uiwait(errordlg(errorMessage));
+end
 
-function [root,iterations,header,iterTable,precision,time] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps, handles)
+
+function [root,iterations,header,iterTable,precision,time] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps)
 warning('off','all');
 try
     switch selectedIndex
@@ -222,7 +237,7 @@ try
         case 5
             [root,iterations,header,iterTable,precision,time] = Secant(f,a, b,maxIterations,eps);
         case 6
-            [root,iterations,header,iterTable,precision,time] = birgeVieta(f,a,eps,maxIterations);
+            [root,iterations,header,iterTable,precision,time] = birgeVieta(f,a,maxIterations,eps);
         otherwise
             errordlg('Wrong method!');
             return;
@@ -242,18 +257,20 @@ set(handles.optPrecisionLabel, 'string', precision);
 set(handles.optTimeLabel, 'string', time);
 buildTable(handles.optTable,header, iterTable)
 
-function [root,iterations,header,iterTable,precision,time] = solveMainAlgorithm(f, a1, maxIterations, eps, handles)
+function [root,iterations,header,iterTable,precision,time,error] = solveMainAlgorithm(f, a1, b1, maxIterations, eps)
 warning('off','all')
+error = 0;
 try
-    [root,iterations,header,iterTable,precision,time] = NewtonRaphson(f,a1,maxIterations,eps);
+    [root,iterations,header,iterTable,precision,time] = Illinois(f,a1,b1,maxIterations,eps);
 catch ME
     errorMessage = sprintf('Error Message:\n%s', ...
-        ME.stack(1).name, ME.stack(1).line, ME.message);
+        ME.message);
     fprintf(1, '%s\n', errorMessage);
     uiwait(errordlg(errorMessage));
+    error = 1;
 end
 
-function setMainData(root,iterations,header,iterTable,precision,time, handles)
+function setMainData(root,iterations,header,iterTable,precision,time,handles)
 set(handles.mainRootLabel, 'string', root);
 set(handles.mainIterationsLabel, 'string', iterations);
 set(handles.mainPrecisionLabel, 'string', precision);
@@ -261,13 +278,11 @@ set(handles.mainTimeLabel, 'string', time);
 buildTable(handles.mainTable,header, iterTable)
 
 % --- Executes on selection change in popupmenu1.
-function popupmenu1_Callback(hObject, eventdata, handles)
+function popupmenu1_Callback(~, ~, handles)
+global changedData;
+changedData = true;
 try
-    global changedData;
-    changedData = true;
-    % Get value of popup
     selectedIndex = get(handles.popupmenu1, 'Value');
-    % Take action based upon selection
     if selectedIndex  == 1 || selectedIndex == 2 || selectedIndex == 5
         set(handles.endBox, 'enable', 'on');
     elseif selectedIndex == 3 || selectedIndex == 4 || selectedIndex == 6
@@ -286,23 +301,17 @@ catch ME
 end
 
 % --- Executes during object creation, after setting all properties.
-function popupmenu1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
+function popupmenu1_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
 % --- Executes on button press in pushbutton6.
-function pushbutton6_Callback(hObject, eventdata, handles)
+function pushbutton6_Callback(~, ~, handles)
+global changedData;
+changedData = true;
 try
-    global changedData;
-    changedData = true;
     inputFile = fopen('input.txt');
     selectedIndex = get(handles.popupmenu1, 'value');
     if selectedIndex  == 1 || selectedIndex == 2 || selectedIndex == 5
@@ -316,35 +325,27 @@ try
         set(handles.extraFuncBox, 'string', C{2}{1});
         set(handles.startBox, 'string', C{3}{1});
     end
-catch ME
-    errorMessage = sprintf('Error in function %s() at line %d.\n\nError Message:\n%s', ...
-        ME.stack(1).name, ME.stack(1).line, ME.message);
+catch
+    errorMessage = sprintf('Error in reading the File, Make sure it follows the documentations');
     fprintf(1, '%s\n', errorMessage);
     uiwait(errordlg(errorMessage));
 end
 fclose(inputFile);
 
 
-function funcBox_Callback(hObject, eventdata, handles)
+function funcBox_Callback(~, ~, ~)
 global changedData;
 changedData = true;
 
 
-% --- Executes during object creation, after setting all properties.
-function funcBox_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to funcBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
+function funcBox_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
 
-function startBox_Callback(hObject, eventdata, handles)
+function startBox_Callback(hObject, ~, ~)
 global changedData;
 changedData = true;
 text = get(hObject, 'string');
@@ -353,21 +354,14 @@ if isempty(str2double(text))
     errordlg('Input must be an numerical');
 end
 
-% --- Executes during object creation, after setting all properties.
-function startBox_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to startBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
+function startBox_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
 
-function endBox_Callback(hObject, eventdata, handles)
+function endBox_Callback(hObject, ~, ~)
 global changedData;
 changedData = true;
 text = get(hObject, 'string');
@@ -376,14 +370,7 @@ if isempty(str2double(text))
     errordlg('Input must be an numerical');
 end
 
-% --- Executes during object creation, after setting all properties.
-function endBox_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to endBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
+function endBox_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -395,48 +382,35 @@ set(table, 'data', data);
 
 
 
-function extraFuncBox_Callback(hObject, eventdata, handles)
+function extraFuncBox_Callback(~, ~, ~)
 global changedData;
 changedData = true;
 
 
-% --- Executes during object creation, after setting all properties.
-function extraFuncBox_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to extraFuncBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
+function extraFuncBox_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
 
-function mainStartBox_Callback(hObject, eventdata, handles)
+function mainStartBox_Callback(~, ~, ~)
 global changedData;
 changedData = true;
 
 
 % --- Executes during object creation, after setting all properties.
-function mainStartBox_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to mainStartBox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
+function mainStartBox_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
-function plot_Callback(hObject, eventdata, handles)
+function plot_Callback(~, ~, handles) %#ok<*DEFNU>
 plotGraph(handles);
 
 function plotGraph(handles)
-global pIndex pF pA pB pG pIter;
+global pIndex;
 axes(handles.axes1);
 try
     switch pIndex
@@ -513,7 +487,8 @@ hold on;
 %Large values are used for long vertical axis
 plot([0, 0], [-500000 500000], 'k-');
 hold on;
-plot([0, 0], [1,1]);
+plot([0, 0], [0,500000]);
+hold on;
 plot([pIter(2), pIter(2)], [-500000 500000], 'k-');
 
 
@@ -549,7 +524,7 @@ plot([pIter(3), pIter(3)],[-500000 500000],'m-');
 
 
 % --- Executes on button press in funcPlotter.
-function funcPlotter_Callback(hObject, eventdata, handles)
+function funcPlotter_Callback(~, ~, handles)
 try
     f = get(handles.funcBox, 'string');
     a = str2double(get(handles.plotStartX, 'string'));
@@ -574,49 +549,124 @@ end
 
 
 
-function plotStartX_Callback(hObject, eventdata, handles)
+function plotStartX_Callback(hObject, ~, ~)
+text = get(hObject, 'string');
+all(ismember(text, '0123456789+-.eEdD'))
+if ~all(ismember(text, '0123456789+-.eEdD'))
+    set(hObject,'string','0');
+    uiwait(errordlg('Input must be numerical'));
+end
+
 
 % --- Executes during object creation, after setting all properties.
-function plotStartX_CreateFcn(hObject, eventdata, handles)
+function plotStartX_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
 
-function plotEndX_Callback(hObject, eventdata, handles)
+function plotEndX_Callback(hObject, ~, ~)
+text = get(hObject, 'string');
+all(ismember(text, '0123456789+-.eEdD'))
+if ~all(ismember(text, '0123456789+-.eEdD'))
+    set(hObject,'string','0');
+    uiwait(errordlg('Input must be numerical'));
+end
 
 % --- Executes during object creation, after setting all properties.
-function plotEndX_CreateFcn(hObject, eventdata, handles)
+function plotEndX_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
 
 % --- Executes on button press in plotAll.
-function plotAll_Callback(hObject, eventdata, handles)
+function plotAll_Callback(~, ~, handles)
 warning('off','all');
 try
     maxIterations = str2num(get(handles.itLabel, 'string'));
     eps = str2num(get(handles.percLabel, 'string'));
     inputFile = fopen('allinput.txt', 'r');
     [f, biA, biB, rfA, rfB, fpA, g, npA, secA, secB, bvA] = readData(inputFile);
-    [~,~,~,biiterTable] = bisection(f, biA, biB, maxIterations,eps);
-    [~,~,~,rfiterTable] = regulafalsi(f,rfA, rfB, maxIterations,eps);
-    [~,~,~,fpiterTable] = fixed_point( f,fpA,g, maxIterations, eps );
-    [~,~,~,npiterTable] = NewtonRaphson(f,npA,maxIterations,eps);
-    [root,~,~,seciterTable] = Secant(f,secA, secB,maxIterations,eps);
-    [~,~,~,bviterTable] = birgeVieta(f,bvA,eps,maxIterations);
+    try
+        [~,~,~,biiterTable] = bisection(f, biA, biB,maxIterations,eps);
+    catch ME
+        biiterTable = [0 0 0 0 0 0 0 0;];
+        errorMessage = sprintf('Error in Plotting Bisection, Please recheck\n%s'...
+            ,ME.message);
+        fprintf(1, '%s\n', errorMessage);
+        uiwait(errordlg(errorMessage));
+    end
+    try
+        [~,~,~,rfiterTable] = regulafalsi(f,rfA, rfB, maxIterations,eps);
+    catch ME
+        rfiterTable = [0 0 0 0 0;];
+        errorMessage = sprintf('Error in Plotting Regular Falsai, Please recheck\n%s'...
+            ,ME.message);
+        fprintf(1, '%s\n', errorMessage);
+        uiwait(errordlg(errorMessage));
+    end
+    try
+        [~,~,~,fpiterTable] = fixed_point( f,fpA,g, maxIterations, eps);
+    catch ME
+        fpiterTable = [0 0 0 0;];
+        errorMessage = sprintf('Error in Plotting Fixed Point, Please recheck\n%s'...
+            ,ME.message);
+        fprintf(1, '%s\n', errorMessage);
+        uiwait(errordlg(errorMessage));
+    end
+    try
+        [~,~,~,npiterTable] = NewtonRaphson(f,npA,maxIterations,eps);
+    catch ME
+        npiterTable = [0 0 0 0 0;];
+        errorMessage = sprintf('Error in Plotting Newton Raphson, Please recheck\n%s'...
+            ,ME.message);
+        fprintf(1, '%s\n', errorMessage);
+        uiwait(errordlg(errorMessage));
+    end
+    try
+        [~,~,~,seciterTable] = Secant(f,secA, secB,maxIterations,eps);
+    catch
+        seciterTable = [0 0 0 0 0 0;];
+        errorMessage = sprintf('Error in Plotting Secant, Please recheck\n%s'...
+            ,ME.message);
+        fprintf(1, '%s\n', errorMessage);
+        uiwait(errordlg(errorMessage));
+    end
+    try
+        [~,~,~,bviterTable] = birgeVieta(f,bvA,maxIterations,eps);
+    catch
+        bviterTable = [0 0 0;];
+        errorMessage = sprintf('Error in Plotting Birge Veta, Please recheck\n%s'...
+            ,ME.message);
+        fprintf(1, '%s\n', errorMessage);
+        uiwait(errordlg(errorMessage));
+    end
+    try
+        [a1,b1,errorOccur] = getInitialMain(handles,f);
+        if errorOccur == true
+           error('Could not find an initial guess for Illinois'); 
+        end
+        [~,~,~,illIterable] = Illinois(f,a1,b1,maxIterations,eps);
+    catch
+        illIterable = [0 0 0 0 0 0;];
+        errorMessage = sprintf('Error in Plotting Illinois, Please recheck\n%s'...
+            ,ME.message);
+        fprintf(1, '%s\n', errorMessage);
+        uiwait(errordlg(errorMessage));
+    end
     biiterTable = biiterTable(1:size(biiterTable), 5:5);
     rfiterTable = rfiterTable(1:size(rfiterTable), 3:3);
+    illIterable = illIterable(1:size(illIterable), 3:3);
     fpiterTable = fpiterTable(1:size(fpiterTable), 2:2);
     npiterTable = npiterTable(1:size(npiterTable), 4:4);
     seciterTable = seciterTable(1:size(seciterTable), 3:3);
     bviterTable = bviterTable(1:size(bviterTable), 2:2);
-    plotAllIterations(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable, handles);
+    plotAllIterations(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable, illIterable, handles);
 catch ME
-    errorMessage = sprintf('Error in function %s()\nError Message:\n%s', ...
-        ME.stack(1).name, ME.message);
+    errorMessage = sprintf('Error in Plotting all methods, Please recheck\n%s', ...
+        ME.message);
     fprintf(1, '%s\n', errorMessage);
     uiwait(errordlg(errorMessage));
 end
@@ -648,23 +698,26 @@ function [fpA, g] = readFunctionWithData(inputFile)
 [fpA] = readStartingPoint(inputFile);
 [g] = readFunction(inputFile);
 
-function plotAllIterations(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable, handles)
+function plotAllIterations(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable, illIterable, handles)
 maxSize = max(size(biiterTable), size(rfiterTable));
 maxSize1 = max(size(fpiterTable), size(npiterTable));
 maxSize2 = max(size(seciterTable), size(bviterTable));
 maxSize1 = max(maxSize1, maxSize2);
 maxSize = max(maxSize1, maxSize);
+maxSize = max(maxSize, size(illIterable));
 [biiterTable] = fix(biiterTable, maxSize);
 [rfiterTable] = fix(rfiterTable, maxSize);
 [fpiterTable] = fix(fpiterTable, maxSize);
 [npiterTable] = fix(npiterTable, maxSize);
 [seciterTable] = fix(seciterTable, maxSize);
 [bviterTable] = fix(bviterTable, maxSize);
+[illIterable] = fix(illIterable, maxSize);
 t = 1:maxSize;
-c = horzcat(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable);
+c = horzcat(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable, illIterable);
 axes(handles.axes1);
+cla reset;
 plot(t, c);
-legend('Bisection','False Position','Fixed Point','Newt. Raph.','Birge V.');
+legend('Bisection','False Position','Fixed Point','Newt. Raph.','Birge V.', 'Illinois');
 
 function [b] = fix(a, bSize)
 b = zeros(bSize);
@@ -676,4 +729,46 @@ for i = 1:bSize
     else
         b(i) = a(aSize);
     end
+end
+
+
+
+function searchStart_Callback(hObject, ~, ~)
+text = get(hObject, 'string');
+all(ismember(text, '0123456789+-.eEdD'))
+if ~all(ismember(text, '0123456789+-.eEdD'))
+    set(hObject,'string','0');
+    uiwait(errordlg('Input must be numerical'));
+end
+
+% --- Executes during object creation, after setting all properties.
+function searchStart_CreateFcn(hObject, ~, ~)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function searchDelta_Callback(hObject, ~, ~)
+text = get(hObject, 'string');
+all(ismember(text, '0123456789+-.eEdD'))
+if ~all(ismember(text, '0123456789+-.eEdD'))
+    set(hObject,'string','0');
+    uiwait(errordlg('Input must be numerical'));
+end
+
+function searchDelta_CreateFcn(hObject, ~, ~)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+function searchTime_Callback(hObject, ~, ~)
+text = get(hObject, 'string');
+all(ismember(text, '0123456789+-.eEdD'))
+if ~all(ismember(text, '0123456789+-.eEdD'))
+    set(hObject,'string','0');
+    uiwait(errordlg('Input must be numerical'));
+end
+
+function searchTime_CreateFcn(hObject, ~, ~)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end
