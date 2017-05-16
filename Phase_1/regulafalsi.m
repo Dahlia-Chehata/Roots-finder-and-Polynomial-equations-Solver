@@ -1,43 +1,42 @@
-function [root,iterations, header,iterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps)
+function [root,iterations,header,iterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps)
 iterTable = [];
-bound = 0;
-header = {'Xl' 'Xu' 'Xr' 'f(Xr)' 'eps'};
-Xl = min(a, b);
-Xu = max(a, b);
+header = {'Xl' 'Xu' 'Xr' 'f(Xr)' 'abs(ea)'};
+xlow = min(a, b);
+xup = max(a, b);
 tic;
-Xl_val = eval_func(f, Xl);
-Xu_val = eval_func(f, Xu);
-if Xl_val * Xu_val > 0.0
+xlow_val = eval_func(f, xlow);
+xup_val = eval_func(f, xup);
+if xlow_val * xup_val > 0.0
     error('Function has same sign at end points');
 end
-prev_Xr = nan;
-Xr = 0;
-relative_error = nan;
+prev_root = nan;
+aprox_root = 0;
+abs_error = nan;
 for i = 1 : maxIterations
-    Xr = Xu - Xu_val * (Xu - Xl) / (Xu_val - Xl_val);
-    Xr_val = eval_func(f, Xr);
-    if i > 1
-        relative_error = abs((Xr - prev_Xr) / Xr) * 100;
+    aprox_root = xup - xup_val * (xup - xlow) / (xup_val - xlow_val);
+    Xroot_val = eval_func(f, aprox_root);
+    if i ~= 1
+        abs_error = abs((aprox_root - prev_root));
     end
-    iterTable = [iterTable; [Xl Xu Xr Xr_val relative_error]];
-    if Xr_val == 0.0
+    iterTable = [iterTable; [xlow xup aprox_root Xroot_val abs_error]];
+    if Xroot_val == 0.0
         break;
-    elseif Xr_val * Xl_val < 0
-        Xu = Xr;
-        Xu_val = Xr_val;
+    elseif Xroot_val * xlow_val < 0
+        xup = aprox_root;
+        xup_val = Xroot_val;
     else
-        Xl = Xr;
-        Xl_val = Xr_val;
+        xlow = aprox_root;
+        xlow_val = Xroot_val;
     end
-    if i > 1 && abs(Xr - prev_Xr) < eps
+    if i > 1 && abs_error < eps
         break;
     end
-    prev_Xr = Xr;
+    prev_root = aprox_root;
 end
 time = toc;
-root = Xr;
+root = aprox_root;
 iterations = i;
-precision = relative_error;
+precision = abs_error;
 end
 
 function [answer] =  eval_func(func, value)
