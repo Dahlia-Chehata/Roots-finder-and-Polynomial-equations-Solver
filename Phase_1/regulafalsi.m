@@ -1,6 +1,6 @@
 function [root,iterations,header,iterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps)
 iterTable = [];
-header = {'Xl' 'Xu' 'Xr' 'f(Xr)' 'eps'};
+header = {'Xl' 'Xu' 'Xr' 'f(Xr)' 'abs(ea)'};
 xlow = min(a, b);
 xup = max(a, b);
 tic;
@@ -11,14 +11,14 @@ if xlow_val * xup_val > 0.0
 end
 prev_root = nan;
 aprox_root = 0;
-relative_error = nan;
+abs_error = nan;
 for i = 1 : maxIterations
     aprox_root = xup - xup_val * (xup - xlow) / (xup_val - xlow_val);
     Xroot_val = eval_func(f, aprox_root);
-    if i > 1
-        relative_error = abs((aprox_root - prev_root) / aprox_root) * 100;
+    if i ~= 1
+        abs_error = abs((aprox_root - prev_root));
     end
-    iterTable = [iterTable; [xlow xup aprox_root Xroot_val relative_error]];
+    iterTable = [iterTable; [xlow xup aprox_root Xroot_val abs_error]];
     if Xroot_val == 0.0
         break;
     elseif Xroot_val * xlow_val < 0
@@ -28,7 +28,7 @@ for i = 1 : maxIterations
         xlow = aprox_root;
         xlow_val = Xroot_val;
     end
-    if i > 1 && abs(aprox_root - prev_root) < eps
+    if i > 1 && abs_error < eps
         break;
     end
     prev_root = aprox_root;
@@ -36,7 +36,7 @@ end
 time = toc;
 root = aprox_root;
 iterations = i;
-precision = relative_error;
+precision = abs_error;
 end
 
 function [answer] =  eval_func(func, value)

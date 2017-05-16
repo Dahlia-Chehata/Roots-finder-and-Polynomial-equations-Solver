@@ -5,6 +5,7 @@ iter_value(1)=a;
 iter_value(2) = b;
 IterTable=zeros(0,6);
 header = {'x(i-1)' 'x(i)' 'x(i + 1)' 'F(x(i - 1))' 'F(x(i))' 'abs(ea)'};
+ea = nan;
 for i=2:1:MaxIterations + 1
     f_new = eval(subs(f,iter_value(i)));
     f_old = eval(subs(f,iter_value(i - 1)));
@@ -13,13 +14,13 @@ for i=2:1:MaxIterations + 1
         error('the denominator is equal to zero');
     else
         iter_value(i+1) = iter_value(i) - ((f_new * (iter_value(i - 1) - iter_value(i)))/(f_old - f_new));
-        ea= (iter_value(i+1)-iter_value(i))/(iter_value(i+1))*100;
-        row=[iter_value(i - 1),iter_value(i),iter_value(i + 1),f_old, f_new,abs(ea)];
-        IterTable=[IterTable;row];
+        ea = abs(iter_value(i+1)-iter_value(i));
+        row =[iter_value(i - 1),iter_value(i),iter_value(i + 1),f_old, f_new,ea];
+        IterTable = [IterTable;row];
     end
     check=abs(double(eval(subs(f,iter_value(i+1)))));
+    root=iter_value(i+1);
     if (check<=eps || abs(ea)<=eps)
-        root=iter_value(i+1);
         time = toc;
         break;
     end

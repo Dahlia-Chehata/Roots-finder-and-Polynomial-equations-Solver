@@ -9,6 +9,7 @@ check=true;
 cnt=1;
 IterTable = zeros(0,3);
 header = {'x' 'x(i+1)' 'abs(ea)'};
+ea = nan;
 while (check)
     b=[];
     c=[];
@@ -26,11 +27,9 @@ while (check)
         check=false;
     end
     if(cnt>1)
-        ea=((x(cnt+1)-x(cnt))/x(cnt+1))*100;
-    else
-        ea=0;
+        ea=abs(x(cnt+1)-x(cnt));
     end
-    row=[x(cnt),x(cnt+1),abs(ea)];
+    row=[x(cnt),x(cnt+1),ea];
     IterTable=[IterTable;row];
     if(cnt == MaxIterations)
         break;

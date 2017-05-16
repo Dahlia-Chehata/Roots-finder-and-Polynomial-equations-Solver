@@ -627,7 +627,7 @@ try
     end
     try
         [~,~,~,seciterTable] = Secant(f,secA, secB,maxIterations,eps);
-    catch ME
+    catch
         seciterTable = [0 0 0 0 0 0;];
         errorMessage = sprintf('Error in Plotting Secant, Please recheck\n%s'...
             ,ME.message);
@@ -636,7 +636,7 @@ try
     end
     try
         [~,~,~,bviterTable] = birgeVieta(f,bvA,maxIterations,eps);
-    catch ME
+    catch
         bviterTable = [0 0 0;];
         errorMessage = sprintf('Error in Plotting Birge Veta, Please recheck\n%s'...
             ,ME.message);
@@ -649,7 +649,7 @@ try
            error('Could not find an initial guess for Illinois'); 
         end
         [~,~,~,illIterable] = Illinois(f,a1,b1,maxIterations,eps);
-    catch ME
+    catch
         illIterable = [0 0 0 0 0 0;];
         errorMessage = sprintf('Error in Plotting Illinois, Please recheck\n%s'...
             ,ME.message);
@@ -657,19 +657,12 @@ try
         uiwait(errordlg(errorMessage));
     end
     bisecRoot = biiterTable(1:size(biiterTable), 5:5);
-    bisecError = biiterTable(1:size(biiterTable), 7:7);
     regRoot = rfiterTable(1:size(rfiterTable), 3:3);
-    regError = rfiterTable(1:size(rfiterTable), 5:5);
     illRoot = illIterable(1:size(illIterable), 3:3);
-    illError = illIterable(1:size(illIterable), 5:5);
     fixedRoot = fpiterTable(1:size(fpiterTable), 2:2);
-    fixedError = fpiterTable(1:size(fpiterTable), 4:4);
     newtRoot = npiterTable(1:size(npiterTable), 4:4);
-    newtError = npiterTable(1:size(npiterTable), 5:5);
     secRoot = seciterTable(1:size(seciterTable), 3:3);
-    secError = seciterTable(1:size(seciterTable), 6:6);
     birgeRoot = bviterTable(1:size(bviterTable), 2:2);
-    birgeError = bviterTable(1:size(bviterTable), 3:3);
     plotAllIterations(bisecRoot, regRoot, fixedRoot, newtRoot, secRoot, birgeRoot, illRoot, handles);
     plotAllError(bisecError, regError, fixedError, newtError, secError, birgeError, illError, handles);
 catch ME
@@ -725,7 +718,7 @@ c = horzcat(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bv
 axes(handles.axes1);
 cla reset;
 plot(t, c);
-legend('Bisection','Regular Falsai', 'False Position','Fixed Point','Newt. Raph.','Birge V.', 'Illinois');
+legend('Bisection','False Position','Fixed Point','Newt. Raph.','Birge V.', 'Illinois');
 
 
 function plotAllError(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable, illIterable, handles)
@@ -747,7 +740,7 @@ c = horzcat(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bv
 axes(handles.axes2);
 cla reset;
 plot(t, c);
-legend('Bisection','Regular Falsai', 'False Position','Fixed Point','Newt. Raph.','Birge V.', 'Illinois');
+legend('Bisection','False Position','Fixed Point','Newt. Raph.','Birge V.', 'Illinois');
 axes(handles.axes1);
 
 function [b] = fix(a, bSize)

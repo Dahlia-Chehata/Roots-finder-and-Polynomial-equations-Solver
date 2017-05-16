@@ -18,15 +18,15 @@ elseif (xlow_val * xup_val > 0 )
 end
 Iterations = maxIterations;
 header = {'a' 'F(a)' 'b' 'F(b)' 'r(i)' 'F(r(i))' 'abs(ea)' 'bound'};
+ea = nan;
 for i = 1:1:maxIterations
     approx_root(i) = (xlow + xup)/2;
-    if (i~=1 && approx_root(i) ~= 0)
-        ea=((approx_root(i)-approx_root(i-1))/approx_root(i))*100;
-    else
-        ea = 100;
+    xr = approx_root(i);
+    if (i~=1)
+        ea=abs(approx_root(i)-approx_root(i-1));
     end
     xr_val = eval(subs(f,approx_root(i)));
-    row=[xlow,xlow_val,xup,xup_val,approx_root(i),xr_val,abs(ea),(b - a)/(2^i)];
+    row=[xlow,xlow_val,xup,xup_val,approx_root(i),xr_val,ea,(b - a)/(2^i)];
     IterTable=[IterTable;row];
     if (xr_val == 0.0)
         xr = approx_root(i);
