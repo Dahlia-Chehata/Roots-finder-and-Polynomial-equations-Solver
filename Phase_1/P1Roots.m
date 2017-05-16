@@ -703,8 +703,9 @@ C = fscanf(inputFile,' %s',1);
 a = str2double(C);
 
 function [fpA, g] = readFunctionWithData(inputFile)
-[fpA] = readStartingPoint(inputFile);
 [g] = readFunction(inputFile);
+[fpA] = readStartingPoint(inputFile);
+
 
 function plotAllIterations(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable, illIterable, handles)
 maxSize = max(size(biiterTable), size(rfiterTable));
@@ -725,7 +726,7 @@ c = horzcat(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bv
 axes(handles.axes1);
 cla reset;
 plot(t, c);
-legend('Bisection','Regular Falsai', 'False Position','Fixed Point','Newt. Raph.','Birge V.', 'Illinois');
+legend('Bisection','Regular Falsai','Fixed Point','Newt. Raph.', 'Secant','Birge V.', 'Illinois');
 
 
 function plotAllError(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bviterTable, illIterable, handles)
@@ -747,7 +748,7 @@ c = horzcat(biiterTable, rfiterTable, fpiterTable, npiterTable, seciterTable, bv
 axes(handles.axes2);
 cla reset;
 plot(t, c);
-legend('Bisection','Regular Falsai', 'False Position','Fixed Point','Newt. Raph.','Birge V.', 'Illinois');
+legend('Bisection','Regular Falsai','Fixed Point','Newt. Raph.','Secant', 'Birge V.', 'Illinois');
 axes(handles.axes1);
 
 function [b] = fix(a, bSize)

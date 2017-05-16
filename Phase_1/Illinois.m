@@ -23,21 +23,14 @@ for i = 1 : maxIterations
     if xroot_val == 0.0
         break;
     elseif xroot_val * xlow_val < 0
+        xup = xlow;
+        xup_val = xlow_val;
         xlow = xroot;
         xlow_val = xroot_val;
-		if side == 1
-			xup_val = xup_val / 2.0;
-		else
-			side = 1;
-		end
     else
-        xup = xroot;
-        xup_val = xroot_val;
-		if side == -1
-			xlow_val = xlow_val / 2.0;
-		else
-			side = -1;
-		end
+        xlow = xroot;
+        xlow_val = xroot_val;
+        xup_val = xup_val / 2.0;
     end
     if i > 1 && abs_error < eps
         break;
