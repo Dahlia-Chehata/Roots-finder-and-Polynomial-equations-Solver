@@ -161,6 +161,11 @@ else
 end
 
 function solve_btn_Callback(~, ~, handles)
+[error] = singularityCheck(a, b);
+if(error)
+    errordlg('Matrix rank is not correct, Therefore there is an infinite number of solutions.');
+    return;
+end
 reset_fields(handles);
 
 global tolerance method input_equations bes used_gauss_seidel max_iterations epsillon initial_guesses;
