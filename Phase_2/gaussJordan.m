@@ -1,5 +1,6 @@
 function [method_name, x] = gaussJordan(a, b, eps)
     method_name = 'Gaussian-Jordan';
+    [a, b] = pivoting(a, b, eps);
     b = transpose(b);
     length = size(a, 1);
     augmented = [a, b];
