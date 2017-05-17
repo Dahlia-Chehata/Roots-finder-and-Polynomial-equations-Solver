@@ -28,9 +28,8 @@ function [method_name, final_ans, iterations_matrix] = seidle(a, b, x, iteration
                 if(flag == 1)
                     err = 'Not Diagonally-Dominant';
                 else
-                    err = 'Division by zero';
-                end
-                exception = MException('seidle:division_by_zero', err);
+                    err =
+                exception = MException('seidle:division_by_zero', 'Division by zero');
                 throw(exception);
             end
             if iterations_matrix(iter, 2 * var_x) > eps

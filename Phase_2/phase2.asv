@@ -214,7 +214,6 @@ elseif (method == 4)
         set(handles.number_of_iterations, 'string', size(ans_matrix, 1));
         used_gauss_seidel = true;
     catch exception
-        display(getReport(exception));
         display(exception.message);
         errordlg(exception.message);
     end

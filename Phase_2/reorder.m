@@ -1,5 +1,5 @@
 function [ordered, orderedB, err] = reOrder(unOrdered, b)
-    n = size(unOrdered, 1);
+     n = size(unOrdered, 1);
     orderdB = [];
     taken = [];
     orderd = zeros(0, n * 2);
@@ -19,6 +19,8 @@ function [ordered, orderedB, err] = reOrder(unOrdered, b)
         end
         if taken(maxIndex) == 1
             err = 1;
+            orderedB = b(1:end);
+            ordered = unOrdered(1:end, 1:end);
             return;
         end
         taken(maxIndex) = 1;
