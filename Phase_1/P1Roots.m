@@ -184,6 +184,7 @@ end
 [oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps);
 setOptData(oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime, handles);
 write_to_xls('output.xls',2, handles.optTable);
+
 plotGraph(handles);
 
 function [a1,b1,error] = getInitialMain(handles, funct)
@@ -425,7 +426,6 @@ try
         case 5
             plotSecant(handles);
         case 6
-            errordlg('Cannot plot Birge-Vieta''s method!');
         otherwise
             errordlg('Wrong Plotting data!');
             return;
