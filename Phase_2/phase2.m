@@ -184,7 +184,6 @@ if (method == 1 || method == 2 || method == 3)
             [~, ans_matrix] = gaussJordan(input_equations, bes, tolerance);
             ans_matrix = transpose(ans_matrix);
         catch exception
-            display(exception.message);
             errordlg(exception.message);
             error_flag = - 1;
         end
@@ -210,8 +209,6 @@ elseif (method == 4)
         set(handles.number_of_iterations, 'string', size(ans_matrix, 1));
         used_gauss_seidel = true;
     catch exception
-        display(getReport(exception));
-        display(exception.message);
         errordlg(exception.message);
     end
 elseif (method == 5)
@@ -274,7 +271,6 @@ time = tic;
 try
     [temp_method_name, ans_matrix] = gaussJordan(input_equations, bes, tolerance);
 catch exception
-    display(exception.message);
     errordlg(exception.message);
     error_flag = - 1;
 end
@@ -297,7 +293,6 @@ try
     set(handles.gauss_seidel_table, 'ColumnName', header);
     set(handles.number_of_iterations, 'string', size(iterations_matrix, 1));
 catch exception
-    display(exception.message);
     errordlg(exception.message);
 end
 
@@ -335,7 +330,6 @@ ans_matrix = [];
 try
     ans_matrix = get(handles.gauss_seidel_table, 'data');
 catch exception
-    display(exception.message);
     errordlg(exception.message);
 end
 axes(handles.plot_paper);
