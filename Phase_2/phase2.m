@@ -30,9 +30,9 @@ varargout{1} = handles.output;
 function max_iterations_Callback(hObject, ~, ~)
 global max_iterations;
 number = str2double(get(hObject, 'string'));
-if isempty(number) || floor(number) ~= number
+if (~is_double(get(hObject, 'string')) || floor(number) ~= number)
     set(hObject, 'string', '50');
-    errordlg('input must be an integer!');
+    uiwait(errordlg('input must be an integer!'));
     return;
 end
 max_iterations = floor(number);
@@ -44,17 +44,16 @@ if ispc && isequal(get(hObject, 'BackgroundColor'), get(0, 'defaultUicontrolBack
     set(hObject, 'BackgroundColor', 'white');
 end
 
-function epsillon_Callback(hObject, ~, ~)
+function epsillon_input_Callback(hObject, ~, ~)
 global epsillon;
-number = str2double(get(hObject, 'string'));
-if isempty(number)
+if (~is_double(get(hObject, 'string')))
     set(hObject, 'string', '0.00001');
-    errordlg('input must be a real number!');
+    uiwait(errordlg('input must be a real number!'));
     return;
 end
-epsillon = number;
+epsillon = str2double(get(hObject, 'string'));
 
-function epsillon_CreateFcn(hObject, ~, ~)
+function epsillon_input_CreateFcn(hObject, ~, ~)
 global epsillon;
 epsillon = 0.00001;
 if ispc && isequal(get(hObject, 'BackgroundColor'), get(0, 'defaultUicontrolBackgroundColor'))
@@ -65,15 +64,14 @@ function tolerance_input_CreateFcn(hObject, eventdata, handles)
 global tolerance;
 tolerance = 0.00001;
 
-function tolerance_input_Callback(hObject, eventdata, handles)
+function tolerance_input_Callback(hObject, ~, ~)
 global tolerance;
-number = str2double(get(hObject, 'string'));
-if isempty(number)
+if (~is_double(get(hObject, 'string')))
     set(hObject, 'string', '0.00001');
-    errordlg('input must be a real number!');
+    uiwait(errordlg('input must be a real number!'));
     return;
 end
-tolerance = number;
+tolerance = str2double(get(hObject, 'string'));
 
 function methods_Callback(hObject, ~, ~)
 global method;
@@ -133,13 +131,12 @@ global input_equations;
 global bes;
 row_index = eventdata.Indices(1);
 column_index = eventdata.Indices(2);
-number = str2double(strcat(eventdata.EditData));
-if (isempty(number))
+if (~is_double(strcat(eventdata.EditData)))
     errordlog('input must be a real number');
 elseif (column_index == number_of_equations + 1)
-    bes(row_index) = number;
+    bes(row_index) = str2double(strcat(eventdata.EditData));
 else
-    input_equations(row_index, column_index) = number;
+    input_equations(row_index, column_index) = str2double(strcat(eventdata.EditData));
 end
 
 function initial_guesses_CellEditCallback(~, eventdata, ~)
@@ -152,12 +149,11 @@ function initial_guesses_CellEditCallback(~, eventdata, ~)
 %    Error: error string when failed to convert EditData to appropriate value for Data
 % handles    structure with handles and user data (see GUIDATA)
 global initial_guesses;
-number = str2double(strcat(eventdata.EditData));
-if (isempty(number))
-    errordlog('input must be a real number');
+if (~is_double(strcat(eventdata.EditData)))
+    uiwait(errordlog('input must be a real number'));
 else
     row_index = eventdata.Indices(2);
-    initial_guesses(row_index) = number;
+    initial_guesses(row_index) = str2double(strcat(eventdata.EditData));
 end
 
 function solve_btn_Callback(~, ~, handles)
@@ -188,7 +184,6 @@ if (method == 1 || method == 2 || method == 3)
             [~, ans_matrix] = gaussJordan(input_equations, bes, tolerance);
             ans_matrix = transpose(ans_matrix);
         catch exception
-            display(exception.message);
             errordlg(exception.message);
             error_flag = - 1;
         end
@@ -214,8 +209,6 @@ elseif (method == 4)
         set(handles.number_of_iterations, 'string', size(ans_matrix, 1));
         used_gauss_seidel = true;
     catch exception
-        display(getReport(exception));
-        display(exception.message);
         errordlg(exception.message);
     end
 elseif (method == 5)
@@ -278,7 +271,6 @@ time = tic;
 try
     [temp_method_name, ans_matrix] = gaussJordan(input_equations, bes, tolerance);
 catch exception
-    display(exception.message);
     errordlg(exception.message);
     error_flag = - 1;
 end
@@ -301,7 +293,6 @@ try
     set(handles.gauss_seidel_table, 'ColumnName', header);
     set(handles.number_of_iterations, 'string', size(iterations_matrix, 1));
 catch exception
-    display(exception.message);
     errordlg(exception.message);
 end
 
@@ -315,14 +306,6 @@ set(handles.final_answer_table, 'data', [final_answers, consumed_time]);
 
 used_gauss_seidel = true;
 
-function [rows] = build_iterative_table_rows_names(sz)
-rows = cell(sz + 2, 1);
-for i = 1 : sz
-    rows{i} = sprintf('%d', i);
-end
-rows{sz + 1} = 'Execution Time';
-rows{sz + 2} = 'Iterations';
-
 function reset_fields(handles)
 axes(handles.plot_paper);
 cla;
@@ -335,7 +318,7 @@ set(handles.gauss_seidel_table, 'ColumnName', 'numbered');
 set(handles.final_answer_table, 'ColumnName', 'numbered');
 
 function plot_btn_Callback(~, ~, handles)
-global method input_equations bes used_gauss_seidel max_iterations epsillon initial_guesses;
+global method used_gauss_seidel;
 if (used_gauss_seidel == false)
     set(handles.methods, 'Value', 4);
     temp = method;
@@ -347,7 +330,6 @@ ans_matrix = [];
 try
     ans_matrix = get(handles.gauss_seidel_table, 'data');
 catch exception
-    display(exception.message);
     errordlg(exception.message);
 end
 axes(handles.plot_paper);
@@ -368,7 +350,7 @@ set(handles.initial_guesses, 'ColumnEditable', true(1, number_of_equations));
 
 % --- Executes on button press in write_to_file_btn.
 function write_to_file_btn_Callback(~, ~, handles)
-%try
+try
     file_name = inputdlg('Enter space-separated numbers:', ...
         'Sample', [1 89]);
     if(isempty(file_name))
@@ -380,7 +362,14 @@ function write_to_file_btn_Callback(~, ~, handles)
     end
     write_to_xls(path, 1, handles.final_answer_table);
     write_to_xls(path, 2, handles.gauss_seidel_table);
-%catch exception
-    %errordlg(getReport(exception));
-%end
+catch exception
+    uiwait(errordlg(exception.message));
+end
 
+function [result] = is_double(text)
+all(ismember(text, '0123456789+-.eEdD'))
+if ~all(ismember(text, '0123456789+-.eEdD'))
+    result = false;
+else
+    result = true;
+end
