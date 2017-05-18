@@ -1,5 +1,6 @@
-function [root,iterations,header,iterTable,precision,time] = Illinois(f,a,b,maxIterations, eps)
+function [root,iterations,header,iterTable,precision,time,bound] = Illinois(f,a,b,maxIterations, eps)
 iterTable = [];
+bound = '';
 header = {'Xl' 'Xu' 'Xr' 'f(Xr)' 'abs(ea)'};
 xlow = min(a, b);
 xup = max(a, b);
@@ -40,7 +41,7 @@ end
 time = toc;
 root = xroot;
 iterations = i;
-precision = abs_error;
+precision = eval_func(f,root);
 end
 
 function [answer] =  eval_func(func, value)

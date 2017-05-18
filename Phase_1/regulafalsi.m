@@ -1,8 +1,9 @@
-function [root,iterations,header,iterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps)
+function [root,iterations,header,iterTable,precision,time,bound] = regulafalsi(f,a,b, maxIterations,eps)
 iterTable = [];
 header = {'Xl' 'Xu' 'Xr' 'f(Xr)' 'abs(ea)'};
 xlow = min(a, b);
 xup = max(a, b);
+bound = '';
 tic;
 xlow_val = eval_func(f, xlow);
 xup_val = eval_func(f, xup);
@@ -36,7 +37,7 @@ end
 time = toc;
 root = aprox_root;
 iterations = i;
-precision = abs_error;
+precision = eval_func(f,root);
 end
 
 function [answer] =  eval_func(func, value)

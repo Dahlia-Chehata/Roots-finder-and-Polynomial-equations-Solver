@@ -1,6 +1,7 @@
-function [root,iterations,header,IterTable,precision,time] = birgeVieta(polynomial,initVal,MaxIterations,eps)
+function [root,iterations,header,IterTable,precision,time,bound] = birgeVieta(polynomial,initVal,MaxIterations,eps)
 tic;
 x=zeros(MaxIterations,1);
+bound = '';
 x(1)=initVal;
 coeff=sym2poly(sym(polynomial));
 a=fliplr(coeff);

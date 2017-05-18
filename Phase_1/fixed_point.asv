@@ -26,7 +26,7 @@ time=toc;
 bound = '';
 if good == 1
     if trueRoot - a ~= 0
-        bound = abs((eval(subs(g,trueRoot)) - eval(subs(g,a)))/(trueRoot - a));
+        bound = abs((eval(subs(g,trueRoot)) - eval(subs(g,a)))/(trueRoot - a);
     end
 end
 end

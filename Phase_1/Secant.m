@@ -1,9 +1,10 @@
-function [root,iterations,header,IterTable,precision,time] = Secant(f,a, b,MaxIterations,eps)
+function [root,iterations,header,IterTable,precision,time,bound] = Secant(f,a, b,MaxIterations,eps)
 tic;
 iter_value = zeros(1,MaxIterations);
 iter_value(1)=a;
 iter_value(2) = b;
 IterTable=zeros(0,6);
+bound = '';
 header = {'x(i-1)' 'x(i)' 'x(i + 1)' 'F(x(i - 1))' 'F(x(i))' 'abs(ea)'};
 ea = nan;
 for i=2:1:MaxIterations + 1

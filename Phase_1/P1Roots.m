@@ -181,7 +181,8 @@ if error ~= true
         write_to_xls('output.xls',1, handles.mainTable);
     end
 end
-[oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps);
+[oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime,oBound] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps);
+set(handles.boundLabel, 'string', oBound);
 setOptData(oRoot,oIterations,oHeader,oiterTable,oPrecision,oTime, handles);
 write_to_xls('output.xls',2, handles.optTable);
 
@@ -223,22 +224,22 @@ catch ME
 end
 
 
-function [root,iterations,header,iterTable,precision,time] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps)
+function [root,iterations,header,iterTable,precision,time,bound] = solveOptionalAlgorithm(selectedIndex, f, a, b, g, maxIterations, eps)
 warning('off','all');
 try
     switch selectedIndex
         case 1
-            [root,iterations,header,iterTable,precision,time] = bisection(f, a, b, maxIterations,eps);
+            [root,iterations,header,iterTable,precision,time,bound] = bisection(f, a, b, maxIterations,eps);
         case 2
-            [root,iterations,header,iterTable,precision,time] = regulafalsi(f,a,b, maxIterations,eps);
+            [root,iterations,header,iterTable,precision,time,bound] = regulafalsi(f,a,b, maxIterations,eps);
         case 3
-            [ root,iterations,header,iterTable,precision,time ] = fixed_point( f,a,g, maxIterations, eps );
+            [ root,iterations,header,iterTable,precision,time,bound] = fixed_point( f,a,g, maxIterations, eps );
         case 4
-            [root,iterations,header,iterTable,precision,time] = NewtonRaphson(f,a,maxIterations,eps);
+            [root,iterations,header,iterTable,precision,time,bound] = NewtonRaphson(f,a,maxIterations,eps);
         case 5
-            [root,iterations,header,iterTable,precision,time] = Secant(f,a, b,maxIterations,eps);
+            [root,iterations,header,iterTable,precision,time,bound] = Secant(f,a, b,maxIterations,eps);
         case 6
-            [root,iterations,header,iterTable,precision,time] = birgeVieta(f,a,maxIterations,eps);
+            [root,iterations,header,iterTable,precision,time,bound] = birgeVieta(f,a,maxIterations,eps);
         otherwise
             errordlg('Wrong method!');
             return;
