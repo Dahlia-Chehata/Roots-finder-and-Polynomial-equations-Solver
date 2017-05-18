@@ -1,0 +1,53 @@
+Regular Falsi
+One of the biggest disadvantages of the regular falsi is that in the Convex and concave curves
+near the x-axis its convergence tends to become slower and also may even get stuck and the
+method won't converge at all.
+
+There're two solutions to this problem:
+1-We can try to detect when the convergence become slower and then use bisection for 3~5 iterations
+until the regular falsi method can converge again.
+2-We can use the Illinois modification where the value of the non changing end of the interval can be
+divided by two to increase the convergence speed that it may even has faster convergence than the normal
+regular falsi in normal cases.
+
+
+Fixed point:
+The main problems with the Fixed point Method.
+
+1-The function G(x) may converge very slow or fast or may even diverge depending on the
+nature of the initial guess and the function G(x)
+
+The solution of this problem is to change the function G(x) or try to use different initial
+guesses and we can use the rules describing the rates of convergence for the algorithm for
+this G(x) to avoid using the method on a G(x) that may diverge.
+
+
+Newton Raphson:
+1-One main problem of Newton Raphson is that it may diverge if the initial guess isn't near a
+root for this function or may converge slowly. By calculating the rate of convergence successively
+a good software can identify if the algorithm is diverging or not.
+
+2-It may go into a cycle iterating over the same set of points. To avoid this pitfall we can save the
+previous points in an array or any data structure and in case of repeating a previous pattern we identify
+the current state as a loop.
+
+3-Local maximum or minimum can cause Oscillation of the Newton Raphson Method around the local maximum or minimum.
+To avoid this pitfall we can try to pick th guess as far as possible from the local maximum or minimum and as near
+as possible from th expected root.
+
+4-A Local minimum point would have a derivative function equalling zero which would cause division by zero, so we
+should check the value of the derivative first before calculating the next approximation of the root to know when to
+stop before causing division by zero error.
+
+5-Newton Raphson doesn't converge quadratically when it converges where the root is a multiple roots.
+We can try to guess or specify the multiplicity of the root and use modified Newton Raphson which will
+speed the algorithm.
+
+
+Secant:
+1-It requires two guesses instead of one guess as in Newton Raphson.
+To overcome this problem we can use the modified secant method which
+will require only one initial guess if the delta is selected properly
+because if it's too small it can cause subtractive cancelation in the
+denominator and if it's too big it can cause the method to slow or even
+diverge in the worst case scenario.

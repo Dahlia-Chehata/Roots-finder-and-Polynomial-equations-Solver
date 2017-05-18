@@ -1,4 +1,4 @@
-function [root,iterations,header, iterTable,precision, time] = NewtonRaphson(f,initVal,maxIterations, eps)
+function [root,iterations,header, iterTable,precision, time,bound] = NewtonRaphson(f,initVal,maxIterations, eps)
 syms x;
 deriv_f = diff(f, x);
 iterTable = [];
@@ -24,4 +24,12 @@ time = toc;
 root = new_x;
 iterations = i;
 precision = eval(subs(f, root));
+[trueRoot, good] = nearestRoot(f,initVal);
+bound = '';
+if good == 1
+    dderive = diff(deriv_f, x);
+    if eval(subs(deriv_f, trueRoot)) ~= 0.0
+        bound = -1 * eval(subs(dderive, trueRoot))/ (2 * eval(subs(deriv_f, trueRoot)));
+    end
+end
 end

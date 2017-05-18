@@ -1,6 +1,9 @@
 function [method_name, final_ans, iterations_matrix] = seidle(a, b, x, iterations, eps)
     method_name = 'Gauss-Seidel';
     [a, b, flag] = reorder(a, b);
+    if(flag == 1)
+        errordlg('Not diagonally dominant.');
+    end
     sz = size(a, 1);
     iterations_matrix = zeros(0, sz * 2);
     for i = 1 : sz
@@ -24,12 +27,7 @@ function [method_name, final_ans, iterations_matrix] = seidle(a, b, x, iteration
                 iterations_matrix(iter, 2 * var_x - 1) = sum / a(var_x, var_x);
                 iterations_matrix(iter, 2 * var_x) = abs((iterations_matrix(iter, 2 * var_x - 1) - iterations_matrix(iter - 1, 2 * var_x - 1)) / iterations_matrix(iter, 2 * var_x - 1));
             else
-                err = '';
-                if(flag == 1)
-                    err = 'Not Diagonally-Dominant';
-                else
-                    err = 'Division by zero';
-                end
+                err = 'Division by zero';
                 exception = MException('seidle:division_by_zero', err);
                 throw(exception);
             end

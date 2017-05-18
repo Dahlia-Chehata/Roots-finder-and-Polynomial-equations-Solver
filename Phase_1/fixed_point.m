@@ -1,4 +1,4 @@
-function [root,iterations,header,IterTable,precision,time] = fixed_point( f,a,g, maxIterations, eps )
+function [root,iterations,header,IterTable,precision,time,bound] = fixed_point( f,a,g, maxIterations, eps )
 tic;
 if(isempty(g))
     error('Extra function is required');
@@ -22,4 +22,11 @@ end
 root = xr;
 precision=eval(subs(f, root));
 time=toc;
+[trueRoot, good] = nearestRoot(f,a);
+bound = '';
+if good == 1
+    if trueRoot - a ~= 0
+        bound = abs((eval(subs(g,trueRoot)) - eval(subs(g,a)))/(trueRoot - a));
+    end
+end
 end

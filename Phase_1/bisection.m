@@ -1,4 +1,4 @@
-function [root,Iterations,header,IterTable,precision,time] = bisection(f, a, b, maxIterations,eps)
+function [root,Iterations,header,IterTable,precision,time,bound] = bisection(f, a, b, maxIterations,eps)
 tic;
 syms x;
 IterTable = zeros(0,7);
@@ -16,6 +16,7 @@ elseif (abs(xup_val) == 0.0)
 elseif (xlow_val * xup_val > 0 )
     error('eval f(a) and f(b) do not have opposite signs');
 end
+bound = ceil(log2((xup - xlow)/eps));
 Iterations = maxIterations;
 header = {'a' 'F(a)' 'b' 'F(b)' 'r(i)' 'F(r(i))' 'abs(ea)' 'bound'};
 ea = nan;

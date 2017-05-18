@@ -50,14 +50,15 @@ varargout{1} = handles.output;
 
 function mxItBox_Callback(hObject, ~, ~)
 text = get(hObject, 'string');
-all(ismember(text, '0123456789+-.eEdD'))
-if ~all(ismember(text, '0123456789+-.eEdD'))
+if isempty(str2double(text))
     set(hObject,'string','0');
-    uiwait(errordlg('Input must be numerical'));
+    errordlg('Input must be an integer');
 end
 
 % --- Executes during object creation, after setting all properties.
 function mxItBox_CreateFcn(hObject, ~, ~)
+global changedData;
+changedData = true;
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -65,13 +66,11 @@ end
 
 
 function percBox_Callback(hObject, ~, ~)
-global changedData;
-changedData = true;
+changedData
 text = get(hObject, 'string');
-all(ismember(text, '0123456789+-.eEdD'))
-if ~all(ismember(text, '0123456789+-.eEdD'))
+if isempty(str2double(text))
     set(hObject,'string','0');
-    uiwait(errordlg('Input must be numerical'));
+    errordlg('Input must be numerical');
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -98,8 +97,7 @@ set(handles.percLabel, 'string', get(handles.percBox, 'string'));
 
 % --- Executes on selection change in listbox1.
 function listbox1_Callback(~, ~, ~)
-global changedData;
-changedData = true;
+
 function listbox1_CreateFcn(hObject, ~, ~)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
